@@ -1,6 +1,9 @@
 <div align="center">
-  <h1 align="center">Vortex Memory Profiler</h1>
-  <p align="center">
+
+  <img src="/assets/logo.png" alt="Vortex Memory Profiler Logo" width="600" />
+
+  <h1>Vortex Memory Profiler</h1>
+  <p>
     <strong>A high-performance, real-time memory profiling and corruption detection tool for C and C++ applications.</strong>
   </p>
 </div>
