@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -e
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LIB="$DIR/bin/libvortex.so"
+
+if [ "$1" != "run" ]; then
+    echo "Usage: $0 run <program> [args...]"
+    exit 1
+fi
+
+shift
+
+if [ ! -f "$LIB" ]; then
+    echo "Vortex engine not found at $LIB. Please run 'make' first."
+    exit 1
+fi
+
+    if [ ! -d "$DIR/frontend/dist" ]; then
+        echo "Frontend build not found. Please build the frontend first to use the auto-server."
+        echo "Run: cd frontend && npm install && npm run build"
+        exit 0
+    fi
+    
+    if [ ! -f "$DIR/bin/vortex_server" ]; then
+        echo "Vortex C-Server not found. Please run 'make' first."
+        exit 1
+    fi
+    
+    echo "Starting Live Telemetry C-Server..."
+    "$DIR/bin/vortex_server" "$DIR/frontend/dist" &
+    SERVER_PID=$!
+    
+    trap "kill $SERVER_PID 2>/dev/null" EXIT
+    
+    sleep 1
+    
+    echo "Opening Dashboard..."
+    if command -v xdg-open > /dev/null; then
+        xdg-open http://localhost:8000 &
+    elif command -v open > /dev/null; then
+        open http://localhost:8000 &
+    elif command -v start > /dev/null; then
+        start http://localhost:8000 &
+    elif command -v wslview > /dev/null; then
+        wslview http://localhost:8000 &
+    fi
+    
+    echo "Running target program with Vortex..."
+    env LD_PRELOAD="$LIB" "$@"
+    
+    if [ -f "vortex_report.json" ]; then
+        echo "Report generated: vortex_report.json"
+        cp vortex_report.json "$DIR/frontend/dist/vortex_report.json"
+        
+        echo "Resolving symbols..."
+        curl -s http://localhost:8000/resolve > /dev/null || true
+    else
+        echo "Failed to generate report."
+    fi
+    
+    echo "Dashboard remains open. Press Ctrl+C to stop."
+    wait $SERVER_PID
