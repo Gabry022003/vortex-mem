@@ -23,12 +23,28 @@ function App() {
       .then(json => {
         setData(prev => ({ ...(prev || {}), ...json }));
       })
-      .catch(err => {});
+      .catch(err => { });
   };
 
   useEffect(() => {
     loadReport();
-    
+
+    let buffer = [];
+
+    const flushBuffer = () => {
+      if (buffer.length === 0) return;
+      const currentBuffer = [...buffer];
+      buffer = [];
+
+      setData(prev => {
+        const base = prev || { timeline: [], summary: {}, leaks: [], errors: [], callsite_stats: [] };
+        const newTimeline = [...(base.timeline || []), ...currentBuffer].slice(-1500);
+        return { ...base, timeline: newTimeline };
+      });
+    };
+
+    const flushInterval = setInterval(flushBuffer, 100);
+
     const evtSource = new EventSource('/live');
     evtSource.onmessage = (e) => {
       try {
@@ -37,16 +53,13 @@ function App() {
           loadReport();
           return;
         }
-        
-        setData(prev => {
-          const base = prev || { timeline: [], summary: {}, leaks: [], errors: [], callsite_stats: [] };
-          return { ...base, timeline: [...(base.timeline || []), msg] };
-        });
-      } catch(err) {}
+        buffer.push(msg);
+      } catch (err) { }
     };
-      
+
     return () => {
       evtSource.close();
+      clearInterval(flushInterval);
     };
   }, []);
 
@@ -84,7 +97,7 @@ function App() {
         <h1 style={{ textAlign: 'center', fontSize: '3em', fontWeight: 800, marginBottom: '40px' }}>
           <span style={{ color: '#fff' }}>Vortex</span> <span className="text-gradient">Memory UI</span>
         </h1>
-        <div 
+        <div
           className={`glass-card drop-zone ${dragActive ? "active" : ""}`}
           onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
           onClick={() => document.getElementById("file-upload").click()}
@@ -103,15 +116,15 @@ function App() {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      {}
+      { }
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <h1 style={{ fontSize: '2.5em', fontWeight: 800, margin: 0 }}>
           <span style={{ color: '#fff' }}>Vortex</span> <span className="text-gradient">Memory UI</span>
         </h1>
         <button className="btn-view" onClick={() => setData(null)}>Load Another File</button>
       </div>
-      
-      {}
+
+      { }
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '20px', marginBottom: '30px' }}>
         <div className="glass-card" style={{ marginBottom: 0 }}>
           <h3 style={{ color: '#ff4757', marginTop: 0 }}>Memory Errors</h3>
@@ -140,26 +153,26 @@ function App() {
         </div>
       </div>
 
-      {}
+      { }
       <AnalysisPanel analysis={data.analysis} />
 
-      {}
+      { }
       <MemoryFlameGraph data={data.flame_graph} />
 
-      {}
+      { }
       <TimelineChart timeline={data.timeline} events={data.timeline_events} />
 
-      {}
+      { }
       <LifetimeChart data={data.lifetime_distribution} />
 
-      {}
+      { }
       <CallsiteStatsTable data={data.callsite_stats} />
 
-      {}
+      { }
       {data.leaks?.length > 0 && (
         <div className="glass-card">
           <h2 style={{ color: '#00d2ff', marginTop: 0 }}>Memory Leaks</h2>
-          <InteractiveTable 
+          <InteractiveTable
             rowKey="address" data={data.leaks}
             columns={[
               { key: 'address', label: 'Address' },
@@ -171,14 +184,14 @@ function App() {
         </div>
       )}
 
-      {}
+      { }
       {data.errors?.length > 0 && (
         <div className="glass-card">
           <h2 style={{ color: '#ff4757', marginTop: 0 }}>Errors</h2>
-          <InteractiveTable 
+          <InteractiveTable
             rowKey="address" data={data.errors}
             columns={[
-              { key: 'type', label: 'Type', render: v => <span style={{color: '#ff4757'}}>{v}</span> },
+              { key: 'type', label: 'Type', render: v => <span style={{ color: '#ff4757' }}>{v}</span> },
               { key: 'address', label: 'Address' },
               { key: 'size', label: 'Size', render: v => formatBytes(v) },
               { key: 'stacktrace', label: 'Stack Trace', sortable: false }

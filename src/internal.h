@@ -1,7 +1,7 @@
 /*
  * Internal Structures
  * Core data types, macros, and function declarations for the Vortex backend.
-*/
+ */
 #pragma once
 
 #ifndef _GNU_SOURCE
@@ -21,6 +21,23 @@
 #define VX_RED_ZONE_SIZE 16
 #define VX_RED_ZONE_PATTERN 0xFD
 #define VX_MAX_STACK_FRAMES 16
+#define VX_STRIPE_COUNT 64
+
+#include <stdatomic.h>
+
+typedef struct
+{
+    uint64_t timestamp_ms;
+    size_t memory_used;
+} VxTelemetryEvent;
+
+#define VX_RING_BUFFER_SIZE 8192
+typedef struct
+{
+    VxTelemetryEvent events[VX_RING_BUFFER_SIZE];
+    _Atomic size_t head;
+    _Atomic size_t tail;
+} VxTelemetryRingBuffer;
 
 typedef struct
 {

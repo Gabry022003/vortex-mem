@@ -16,7 +16,7 @@
 
 static VxStackEntry *stack_table = NULL;
 static size_t stack_count = 0;
-static pthread_mutex_t stack_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t stack_locks[VX_STRIPE_COUNT];
 
 static uint32_t hash_frames(void **frames, int depth)
 {
@@ -41,6 +41,10 @@ void vx_stacktrace_init(void)
     {
         memset(stack_table, 0, size);
     }
+    for (int i = 0; i < VX_STRIPE_COUNT; i++)
+    {
+        pthread_mutex_init(&stack_locks[i], NULL);
+    }
 }
 
 uint32_t vx_stacktrace_register(void)
@@ -60,10 +64,11 @@ uint32_t vx_stacktrace_register(void)
         actual_frames[i] = frames[i + 2];
 
     uint32_t hash = hash_frames(actual_frames, actual_depth);
+    uint32_t stripe = hash % VX_STRIPE_COUNT;
     uint32_t idx = hash % STACK_TABLE_CAPACITY;
     uint32_t start_idx = idx;
 
-    pthread_mutex_lock(&stack_lock);
+    pthread_mutex_lock(&stack_locks[stripe]);
 
     while (stack_table[idx].depth != 0)
     {
@@ -72,13 +77,13 @@ uint32_t vx_stacktrace_register(void)
         {
 
             stack_table[idx].alloc_count++;
-            pthread_mutex_unlock(&stack_lock);
+            pthread_mutex_unlock(&stack_locks[stripe]);
             return idx + 1;
         }
         idx = (idx + 1) % STACK_TABLE_CAPACITY;
         if (idx == start_idx)
         {
-            pthread_mutex_unlock(&stack_lock);
+            pthread_mutex_unlock(&stack_locks[stripe]);
             return 0;
         }
     }
@@ -87,9 +92,9 @@ uint32_t vx_stacktrace_register(void)
     stack_table[idx].hash = hash;
     stack_table[idx].alloc_count = 1;
     memcpy(stack_table[idx].frames, actual_frames, actual_depth * sizeof(void *));
-    stack_count++;
+    __atomic_add_fetch(&stack_count, 1, __ATOMIC_RELAXED);
 
-    pthread_mutex_unlock(&stack_lock);
+    pthread_mutex_unlock(&stack_locks[stripe]);
     return idx + 1;
 }
 
@@ -132,42 +137,73 @@ char *vx_stacktrace_symbolize(uint32_t id)
     result[0] = '\0';
     size_t len = 0;
 
+    const char *binaries[64] = {0};
+    void *offsets[64] = {0};
+    char line_infos[64][512] = {0};
+    bool has_line_infos[64] = {0};
+
     for (uint32_t i = 0; i < entry->depth; i++)
     {
         Dl_info info;
-        char line_info[512] = {0};
-        bool has_line_info = false;
-
         if (dladdr(entry->frames[i], &info) && info.dli_fname)
         {
-            void *offset;
-            offset = (void *)((char *)entry->frames[i] - (char *)info.dli_fbase);
+            binaries[i] = info.dli_fname;
+            offsets[i] = (void *)((char *)entry->frames[i] - (char *)info.dli_fbase);
+        }
+    }
 
-            char cmd[512];
-            snprintf(cmd, sizeof(cmd), "env -u LD_PRELOAD addr2line -e %s %p 2>/dev/null", info.dli_fname, offset);
+    for (uint32_t i = 0; i < entry->depth; i++)
+    {
+        if (!binaries[i] || has_line_infos[i])
+            continue;
 
-            FILE *fp = popen(cmd, "r");
-            if (fp)
+        char cmd[4096];
+        int written = snprintf(cmd, sizeof(cmd), "env -u LD_PRELOAD addr2line -e %s", binaries[i]);
+
+        int matching_indices[64];
+        int match_count = 0;
+
+        for (uint32_t j = i; j < entry->depth; j++)
+        {
+            if (binaries[j] && strcmp(binaries[i], binaries[j]) == 0 && !has_line_infos[j])
             {
-                if (fgets(line_info, sizeof(line_info), fp))
-                {
-                    size_t slen = strlen(line_info);
-                    if (slen > 0 && line_info[slen - 1] == '\n')
-                        line_info[slen - 1] = '\0';
-
-                    if (line_info[0] != '?' && strlen(line_info) > 0)
-                    {
-                        has_line_info = true;
-                    }
-                }
-                pclose(fp);
+                matching_indices[match_count++] = j;
+                int n = snprintf(cmd + written, sizeof(cmd) - written, " %p", offsets[j]);
+                if (n > 0 && (size_t)written + n < sizeof(cmd))
+                    written += n;
             }
         }
 
-        char buffer[1024];
-        if (has_line_info)
+        snprintf(cmd + written, sizeof(cmd) - written, " 2>/dev/null");
+
+        FILE *fp = popen(cmd, "r");
+        if (fp)
         {
-            snprintf(buffer, sizeof(buffer), "%s\n    at %s\n", syms[i], line_info);
+            for (int k = 0; k < match_count; k++)
+            {
+                int idx = matching_indices[k];
+                if (fgets(line_infos[idx], sizeof(line_infos[idx]), fp))
+                {
+                    size_t slen = strlen(line_infos[idx]);
+                    if (slen > 0 && line_infos[idx][slen - 1] == '\n')
+                        line_infos[idx][slen - 1] = '\0';
+
+                    if (line_infos[idx][0] != '?' && strlen(line_infos[idx]) > 0)
+                    {
+                        has_line_infos[idx] = true;
+                    }
+                }
+            }
+            pclose(fp);
+        }
+    }
+
+    for (uint32_t i = 0; i < entry->depth; i++)
+    {
+        char buffer[1024];
+        if (has_line_infos[i])
+        {
+            snprintf(buffer, sizeof(buffer), "%s\n    at %s\n", syms[i], line_infos[i]);
         }
         else
         {

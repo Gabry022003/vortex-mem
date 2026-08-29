@@ -22,7 +22,10 @@ GOD_MODE_BIN = $(BIN_DIR)/test_mode
 SERVER_SRC = $(SRC_DIR)/server.c
 SERVER_BIN = $(BIN_DIR)/vortex_server
 
-all: $(LIB) $(TEST_BIN) $(GOD_MODE_BIN) $(SERVER_BIN)
+MULTITHREAD_SRC = $(TEST_DIR)/test_multithread.c
+MULTITHREAD_BIN = $(BIN_DIR)/test_multithread
+
+all: $(LIB) $(TEST_BIN) $(GOD_MODE_BIN) $(SERVER_BIN) $(MULTITHREAD_BIN)
 
 $(LIB): $(OBJS)
 	@mkdir -p $(BIN_DIR)
@@ -40,15 +43,23 @@ $(SERVER_BIN): $(SERVER_SRC)
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $< -o $@ -lpthread
 
+$(MULTITHREAD_BIN): $(MULTITHREAD_SRC)
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) -rdynamic $< -o $@ -lpthread
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+RUNNER_SRC = $(TEST_DIR)/run_tests.c
+RUNNER_BIN = $(BIN_DIR)/run_tests
+
 test: all
-	@echo "Running tests with LD_PRELOAD..."
-	LD_PRELOAD=./$(LIB) ./$(TEST_BIN)
+	@echo "Compiling and running C Test Suite Runner..."
+	$(CC) $(CFLAGS) $(RUNNER_SRC) -o $(RUNNER_BIN)
+	./$(RUNNER_BIN)
 
 clean:
 	rm -f $(OBJS) $(LIB) $(TEST_BIN) $(GOD_MODE_BIN) $(SERVER_BIN) vortex_report*.json

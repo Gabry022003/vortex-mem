@@ -40,7 +40,7 @@ static void load_config(void)
     }
     else
     {
-        strcpy(vx_config.output_file, "vortex_report.html");
+        strcpy(vx_config.output_file, "vortex_report.json");
     }
 
     const char *depth = getenv("VORTEX_STACK_DEPTH");
@@ -278,6 +278,12 @@ VX_EXPORT void *calloc(size_t nmemb, size_t size)
 
     vx_in_hook = true;
 
+    if (size && nmemb > ~(size_t)0 / size)
+    {
+        vx_in_hook = false;
+        return NULL;
+    }
+
     size_t total_size = nmemb * size;
     size_t actual_size = total_size;
 
@@ -342,61 +348,111 @@ VX_EXPORT void *realloc(void *ptr, size_t size)
         free(ptr);
         return NULL;
     }
-
     if (vx_in_hook || !real_realloc)
+        return NULL;
+    if (!vx_config.track_allocs)
+        return real_realloc(ptr, size);
+
+    if (vx_config.use_quarantine)
     {
+        void *new_ptr = malloc(size);
+        if (new_ptr)
+        {
+            vx_in_hook = true;
+            VxErrorType err;
+            size_t old_size = 0;
+            uint32_t old_stack_id = 0;
+            if (vx_tracker_remove(ptr, &err, &old_size, &old_stack_id))
+            {
+                size_t copy_size = old_size < size ? old_size : size;
+                memcpy(new_ptr, ptr, copy_size);
+                VxStackEntry *old_entry = vx_stacktrace_get(old_stack_id);
+                if (old_entry)
+                    __atomic_sub_fetch(&old_entry->current_bytes_allocated, old_size, __ATOMIC_RELAXED);
+                __atomic_sub_fetch(&vx_total_memory, old_size, __ATOMIC_RELAXED);
+                void *real_old_ptr = ptr;
+                if (vx_config.use_red_zones)
+                {
+                    real_old_ptr = (char *)ptr - VX_RED_ZONE_SIZE;
+                    bool front_ok = check_redzone(real_old_ptr, VX_RED_ZONE_SIZE);
+                    bool back_ok = check_redzone((char *)ptr + old_size, VX_RED_ZONE_SIZE);
+                    if (!front_ok || !back_ok)
+                    {
+                        uint32_t stack_id = vx_stacktrace_register();
+                        vx_tracker_record_error(VX_ERR_OVERFLOW, ptr, old_size, stack_id);
+                    }
+                }
+                vx_tracker_quarantine_free(real_old_ptr, ptr, old_size);
+            }
+            else
+            {
+                vx_in_hook = false;
+                free(new_ptr);
+                return real_realloc(ptr, size);
+            }
+            vx_in_hook = false;
+            return new_ptr;
+        }
         return NULL;
     }
 
-    if (!vx_config.track_allocs)
+    vx_in_hook = true;
+    VxErrorType err;
+    size_t old_size = 0;
+    uint32_t old_stack_id = 0;
+    if (!vx_tracker_remove(ptr, &err, &old_size, &old_stack_id))
     {
+        vx_in_hook = false;
         return real_realloc(ptr, size);
     }
 
-    void *new_ptr = malloc(size);
-    if (new_ptr)
+    void *real_old_ptr = ptr;
+    if (vx_config.use_red_zones)
     {
-        vx_in_hook = true;
-        VxErrorType err;
-        size_t old_size = 0;
-        uint32_t old_stack_id = 0;
-
-        if (vx_tracker_remove(ptr, &err, &old_size, &old_stack_id))
+        real_old_ptr = (char *)ptr - VX_RED_ZONE_SIZE;
+        bool front_ok = check_redzone(real_old_ptr, VX_RED_ZONE_SIZE);
+        bool back_ok = check_redzone((char *)ptr + old_size, VX_RED_ZONE_SIZE);
+        if (!front_ok || !back_ok)
         {
-            size_t copy_size = old_size < size ? old_size : size;
-            memcpy(new_ptr, ptr, copy_size);
-
-            VxStackEntry *old_entry = vx_stacktrace_get(old_stack_id);
-            if (old_entry)
-            {
-                __atomic_sub_fetch(&old_entry->current_bytes_allocated, old_size, __ATOMIC_RELAXED);
-            }
-            __atomic_sub_fetch(&vx_total_memory, old_size, __ATOMIC_RELAXED);
-
-            void *real_old_ptr = ptr;
-            if (vx_config.use_red_zones)
-            {
-                real_old_ptr = (char *)ptr - VX_RED_ZONE_SIZE;
-                bool front_ok = check_redzone(real_old_ptr, VX_RED_ZONE_SIZE);
-                bool back_ok = check_redzone((char *)ptr + old_size, VX_RED_ZONE_SIZE);
-                if (!front_ok || !back_ok)
-                {
-                    uint32_t stack_id = vx_stacktrace_register();
-                    vx_tracker_record_error(VX_ERR_OVERFLOW, ptr, old_size, stack_id);
-                }
-            }
-            vx_tracker_quarantine_free(real_old_ptr, ptr, old_size);
+            uint32_t stack_id = vx_stacktrace_register();
+            vx_tracker_record_error(VX_ERR_OVERFLOW, ptr, old_size, stack_id);
         }
-        else
-        {
-            vx_in_hook = false;
-            free(new_ptr);
-            return real_realloc(ptr, size);
-        }
-        vx_in_hook = false;
-        return new_ptr;
     }
-    return NULL;
+
+    size_t actual_new_size = vx_config.use_red_zones ? size + 2 * VX_RED_ZONE_SIZE : size;
+    void *new_real_ptr = real_realloc(real_old_ptr, actual_new_size);
+    if (!new_real_ptr)
+    {
+        vx_tracker_record(ptr, old_size, old_stack_id);
+        vx_in_hook = false;
+        return NULL;
+    }
+
+    VxStackEntry *old_entry = vx_stacktrace_get(old_stack_id);
+    if (old_entry)
+        __atomic_sub_fetch(&old_entry->current_bytes_allocated, old_size, __ATOMIC_RELAXED);
+    __atomic_sub_fetch(&vx_total_memory, old_size, __ATOMIC_RELAXED);
+
+    void *user_ptr = vx_config.use_red_zones ? (char *)new_real_ptr + VX_RED_ZONE_SIZE : new_real_ptr;
+    if (vx_config.use_red_zones)
+    {
+        write_redzone(new_real_ptr, VX_RED_ZONE_SIZE);
+        write_redzone((char *)user_ptr + size, VX_RED_ZONE_SIZE);
+    }
+
+    uint32_t stack_id = vx_stacktrace_register();
+    VxStackEntry *entry = vx_stacktrace_get(stack_id);
+    if (entry)
+    {
+        __atomic_add_fetch(&entry->total_bytes_allocated, size, __ATOMIC_RELAXED);
+        __atomic_add_fetch(&entry->current_bytes_allocated, size, __ATOMIC_RELAXED);
+    }
+    size_t current_mem = __atomic_add_fetch(&vx_total_memory, size, __ATOMIC_RELAXED);
+    vx_timeline_record(current_mem);
+    vx_tracker_record(user_ptr, size, stack_id);
+
+    vx_in_hook = false;
+    return user_ptr;
 }
 
 VX_EXPORT int posix_memalign(void **memptr, size_t alignment, size_t size)

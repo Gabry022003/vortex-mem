@@ -73,3 +73,51 @@ VX_EXPORT void operator delete[](void *ptr, const std::nothrow_t &) noexcept
 {
     std::free(ptr);
 }
+
+#if __cplusplus >= 201703L
+VX_EXPORT void *operator new(std::size_t size, std::align_val_t al)
+{
+    if (size == 0)
+        size = 1;
+    void *ptr = std::aligned_alloc(static_cast<std::size_t>(al), size);
+    if (!ptr)
+        throw std::bad_alloc();
+    return ptr;
+}
+
+VX_EXPORT void *operator new[](std::size_t size, std::align_val_t al)
+{
+    if (size == 0)
+        size = 1;
+    void *ptr = std::aligned_alloc(static_cast<std::size_t>(al), size);
+    if (!ptr)
+        throw std::bad_alloc();
+    return ptr;
+}
+
+VX_EXPORT void operator delete(void *ptr, std::align_val_t al) noexcept
+{
+    (void)al;
+    std::free(ptr);
+}
+
+VX_EXPORT void operator delete[](void *ptr, std::align_val_t al) noexcept
+{
+    (void)al;
+    std::free(ptr);
+}
+
+VX_EXPORT void operator delete(void *ptr, std::size_t size, std::align_val_t al) noexcept
+{
+    (void)size;
+    (void)al;
+    std::free(ptr);
+}
+
+VX_EXPORT void operator delete[](void *ptr, std::size_t size, std::align_val_t al) noexcept
+{
+    (void)size;
+    (void)al;
+    std::free(ptr);
+}
+#endif

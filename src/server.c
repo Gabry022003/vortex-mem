@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <stdbool.h>
+#include <errno.h>
 
 #define HTTP_PORT 8000
 #define UDP_PORT 8001
@@ -25,6 +26,80 @@ static int num_clients = 0;
 static pthread_mutex_t clients_lock = PTHREAD_MUTEX_INITIALIZER;
 static char dist_dir[512];
 
+static int udp_sock = -1;
+
+static void *event_loop(void *arg)
+{
+    (void)arg;
+    udp_sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (udp_sock < 0)
+        return NULL;
+
+    int opt = 1;
+    setsockopt(udp_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    addr.sin_port = htons(UDP_PORT);
+
+    if (bind(udp_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+    {
+        perror("Vortex Server: UDP bind failed");
+        return NULL;
+    }
+
+    printf("UDP Telemetry listening on port %d\n", UDP_PORT);
+
+    char buffer[4096];
+    char sse_msg[BUFFER_SIZE];
+
+    while (1)
+    {
+        fd_set readfds;
+        FD_ZERO(&readfds);
+        FD_SET(udp_sock, &readfds);
+        int max_fd = udp_sock;
+
+        if (select(max_fd + 1, &readfds, NULL, NULL, NULL) < 0)
+        {
+            continue;
+        }
+
+        if (FD_ISSET(udp_sock, &readfds))
+        {
+            ssize_t len = recv(udp_sock, buffer, sizeof(buffer) - 1, 0);
+            if (len > 0)
+            {
+                buffer[len] = '\0';
+                snprintf(sse_msg, sizeof(sse_msg), "data: %s\n\n", buffer);
+                size_t msg_len = strlen(sse_msg);
+
+                pthread_mutex_lock(&clients_lock);
+                for (int i = 0; i < num_clients; i++)
+                {
+                    int fd = sse_clients[i];
+                    ssize_t sent = send(fd, sse_msg, msg_len, MSG_NOSIGNAL);
+                    if (sent < 0)
+                    {
+                        if (errno == EAGAIN || errno == EWOULDBLOCK)
+                        {
+                            continue;
+                        }
+                        close(fd);
+                        sse_clients[i] = sse_clients[num_clients - 1];
+                        num_clients--;
+                        i--;
+                    }
+                }
+                pthread_mutex_unlock(&clients_lock);
+            }
+        }
+    }
+    return NULL;
+}
+
 static void broadcast_sse(const char *message)
 {
     char sse_msg[BUFFER_SIZE];
@@ -35,7 +110,7 @@ static void broadcast_sse(const char *message)
     for (int i = 0; i < num_clients; i++)
     {
         int fd = sse_clients[i];
-        if (send(fd, sse_msg, len, MSG_NOSIGNAL) < 0)
+        if (send(fd, sse_msg, len, MSG_NOSIGNAL) < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
         {
             close(fd);
             sse_clients[i] = sse_clients[num_clients - 1];
@@ -44,43 +119,6 @@ static void broadcast_sse(const char *message)
         }
     }
     pthread_mutex_unlock(&clients_lock);
-}
-
-static void *udp_listener(void *arg)
-{
-    (void)arg;
-    int sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sock < 0)
-        return NULL;
-
-    int opt = 1;
-    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    addr.sin_port = htons(UDP_PORT);
-
-    if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-    {
-        perror("Vortex Server: UDP bind failed");
-        return NULL;
-    }
-
-    printf("UDP Telemetry listening on port %d\n", UDP_PORT);
-
-    char buffer[4096];
-    while (1)
-    {
-        ssize_t len = recv(sock, buffer, sizeof(buffer) - 1, 0);
-        if (len > 0)
-        {
-            buffer[len] = '\0';
-            broadcast_sse(buffer);
-        }
-    }
-    return NULL;
 }
 
 static const char *get_mime_type(const char *path)
@@ -103,6 +141,14 @@ static const char *get_mime_type(const char *path)
 static void serve_file(int client_fd, const char *req_path)
 {
     char filepath[2048];
+
+    if (strstr(req_path, ".."))
+    {
+        const char *forbidden = "HTTP/1.1 403 Forbidden\r\nContent-Length: 9\r\n\r\nForbidden";
+        send(client_fd, forbidden, strlen(forbidden), 0);
+        close(client_fd);
+        return;
+    }
 
     if (strcmp(req_path, "/") == 0)
     {
@@ -207,6 +253,9 @@ static void *handle_client(void *arg)
             "Access-Control-Allow-Origin: *\r\n\r\n";
         send(client_fd, sse_header, strlen(sse_header), 0);
 
+        int flags = fcntl(client_fd, F_GETFL, 0);
+        fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
+
         pthread_mutex_lock(&clients_lock);
         if (num_clients < MAX_CLIENTS)
         {
@@ -246,7 +295,7 @@ int main(int argc, char *argv[])
     dist_dir[sizeof(dist_dir) - 1] = '\0';
 
     pthread_t udp_tid;
-    pthread_create(&udp_tid, NULL, udp_listener, NULL);
+    pthread_create(&udp_tid, NULL, event_loop, NULL);
     pthread_detach(udp_tid);
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);

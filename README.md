@@ -25,13 +25,14 @@ Vortex is designed with a strict zero-external-dependency philosophy for its bac
 ### 1. Zero-Interference Heap Management
 To track allocations without triggering infinite recursion within the standard library's `malloc`, Vortex manages its internal state by bypassing the heap entirely. Internal data structures and lock-free hash tables are allocated directly via `mmap` with `MAP_PRIVATE | MAP_ANONYMOUS`. This ensures that the profiler's memory footprint remains strictly isolated from the target process.
 
-### 2. High-Concurrency & Multi-Process Safety
-Vortex is engineered for heavily multi-threaded and multi-processed environments:
-- **Concurrency**: Thread safety is achieved through highly optimized atomic spinlocks, reducing context-switching overhead during high-frequency memory operations.
+### 2. Enterprise-Grade Concurrency & Multi-Process Safety
+Vortex is engineered for heavily multi-threaded and multi-processed environments, processing millions of allocations per second:
+- **Striped Locking**: Thread safety is achieved through an advanced hash-based Striped Locking architecture. This completely eliminates global mutex bottlenecks, allowing multiple threads to allocate memory simultaneously without contention.
+- **Background Resizing**: The internal tracker expands its memory maps dynamically using a detached background thread, guaranteeing zero "stop-the-world" latency spikes for the target application.
 - **Process Bifurcation**: The profiler gracefully handles process cloning (e.g., daemonization or worker spawning). By registering `pthread_atfork` handlers, Vortex safely suspends its internal state before a `fork()` and safely resumes in both parent and child processes, dynamically redirecting telemetry and reports to prevent file descriptor conflicts.
 
 ### 3. Integrated Telemetry Engine
-Vortex eliminates the need for external runtime dependencies (like Python or Node.js) on the backend. The core library spawns a highly efficient, multi-threaded C server using native POSIX TCP/UDP sockets. It processes incoming telemetry asynchronously and broadcasts it to the frontend via Server-Sent Events (SSE).
+Vortex eliminates the need for external runtime dependencies (like Python or Node.js) on the backend. It uses a **Lock-Free MPSC Ring Buffer** to instantly offload networking tasks from the application's memory allocation path. A dedicated background thread relays these events to a highly efficient C server, which utilizes an asynchronous non-blocking event loop (`epoll`/`select`) to broadcast real-time telemetry to the frontend via Server-Sent Events (SSE).
 
 ### 4. Dynamic Symbol Resolution
 Raw memory addresses offer limited debugging value. Vortex automatically resolves stack traces back to their original source files and line numbers. It achieves this dynamically by combining `dladdr` to locate ELF binaries and `popen` interfaces to invoke `addr2line` directly within the C runtime, emitting immediately readable JSON reports.
@@ -83,3 +84,18 @@ To enable memory corruption detection (Redzones and Quarantine), run your execut
 ```bash
 env VORTEX_RED_ZONES=1 VORTEX_QUARANTINE=1 ./vortex run ./bin/your_executable
 ```
+
+## Testing
+
+Vortex includes an integrated, pure-C test suite that orchestrates isolated test binaries to mathematically assert that leaks, double-frees, and multithreading conditions are correctly handled.
+
+```bash
+# Compile and run the test suite
+make test
+```
+
+## License & Citation
+
+Vortex Memory Profiler is released under the **MIT License**. It is 100% free for personal, academic, and commercial use. 
+
+If you use Vortex to profile a commercial application or within an academic research context, we kindly ask you to include an attribution by linking to this repository.

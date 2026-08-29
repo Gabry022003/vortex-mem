@@ -104,7 +104,7 @@ void vx_report_generate(void)
         total_leak_bytes += leaks[i].size;
     }
 
-    const char *out_file = "vortex_report.json";
+    const char *out_file = vx_config.output_file;
 
     fprintf(stderr, "\n--- Vortex Memory Report ---\n");
     if (leak_count > 0)
@@ -179,10 +179,13 @@ void vx_report_generate(void)
         char *syms = vx_stacktrace_symbolize(errors[i].stack_id);
         if (syms)
         {
-            char escaped_syms[8192] = {0};
-            escape_json_string(escaped_syms, syms);
-            fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
-            free(syms);
+            char *escaped_syms = real_malloc(strlen(syms) * 2 + 1);
+            if (escaped_syms) {
+                escape_json_string(escaped_syms, syms);
+                fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
+                real_free(escaped_syms);
+            }
+            real_free(syms);
         }
         else
         {
@@ -203,10 +206,13 @@ void vx_report_generate(void)
         char *syms = vx_stacktrace_symbolize(leaks[i].stack_id);
         if (syms)
         {
-            char escaped_syms[8192] = {0};
-            escape_json_string(escaped_syms, syms);
-            fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
-            free(syms);
+            char *escaped_syms = real_malloc(strlen(syms) * 2 + 1);
+            if (escaped_syms) {
+                escape_json_string(escaped_syms, syms);
+                fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
+                real_free(escaped_syms);
+            }
+            real_free(syms);
         }
         else
         {
@@ -369,10 +375,13 @@ void vx_report_generate(void)
         char *syms = vx_stacktrace_symbolize(a->stack_id);
         if (syms)
         {
-            char escaped_syms[8192] = {0};
-            escape_json_string(escaped_syms, syms);
-            fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
-            free(syms);
+            char *escaped_syms = real_malloc(strlen(syms) * 2 + 1);
+            if (escaped_syms) {
+                escape_json_string(escaped_syms, syms);
+                fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
+                real_free(escaped_syms);
+            }
+            real_free(syms);
         }
         else
         {
