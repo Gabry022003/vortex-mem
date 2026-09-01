@@ -9,6 +9,7 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <sys/resource.h>
+#include <locale.h>
 
 static const char *error_type_str(VxErrorType type)
 {
@@ -20,6 +21,10 @@ static const char *error_type_str(VxErrorType type)
         return "Double Free";
     case VX_ERR_OVERFLOW:
         return "Buffer Overflow (Red Zone)";
+    case VX_ERR_UNDERFLOW:
+        return "Buffer Underflow (Red Zone)";
+    case VX_ERR_USE_AFTER_FREE:
+        return "Use-After-Free (Quarantine)";
     case VX_ERR_INVALID_FREE:
         return "Invalid Free";
     default:
@@ -38,56 +43,166 @@ static int compare_stack_entries(const void *a, const void *b)
     return 0;
 }
 
-static void escape_json_string(char *dest, const char *src)
+static void escape_json_string(char *dest, size_t dest_cap, const char *src)
 {
-    while (*src)
+    if (!dest || dest_cap == 0)
+        return;
+    if (!src)
     {
-        if (*src == '"')
+        *dest = '\0';
+        return;
+    }
+
+    size_t d = 0;
+    while (*src && d + 1 < dest_cap)
+    {
+        unsigned char c = (unsigned char)*src++;
+        if (c == '"')
         {
-            *dest++ = '\\';
-            *dest++ = '"';
+            if (d + 2 >= dest_cap)
+                break;
+            dest[d++] = '\\';
+            dest[d++] = '"';
         }
-        else if (*src == '\\')
+        else if (c == '\\')
         {
-            *dest++ = '\\';
-            *dest++ = '\\';
+            if (d + 2 >= dest_cap)
+                break;
+            dest[d++] = '\\';
+            dest[d++] = '\\';
         }
-        else if (*src == '\b')
+        else if (c == '\b')
         {
-            *dest++ = '\\';
-            *dest++ = 'b';
+            if (d + 2 >= dest_cap)
+                break;
+            dest[d++] = '\\';
+            dest[d++] = 'b';
         }
-        else if (*src == '\f')
+        else if (c == '\f')
         {
-            *dest++ = '\\';
-            *dest++ = 'f';
+            if (d + 2 >= dest_cap)
+                break;
+            dest[d++] = '\\';
+            dest[d++] = 'f';
         }
-        else if (*src == '\n')
+        else if (c == '\n')
         {
-            *dest++ = '\\';
-            *dest++ = 'n';
+            if (d + 2 >= dest_cap)
+                break;
+            dest[d++] = '\\';
+            dest[d++] = 'n';
         }
-        else if (*src == '\r')
+        else if (c == '\r')
         {
-            *dest++ = '\\';
-            *dest++ = 'r';
+            if (d + 2 >= dest_cap)
+                break;
+            dest[d++] = '\\';
+            dest[d++] = 'r';
         }
-        else if (*src == '\t')
+        else if (c == '\t')
         {
-            *dest++ = '\\';
-            *dest++ = 't';
+            if (d + 2 >= dest_cap)
+                break;
+            dest[d++] = '\\';
+            dest[d++] = 't';
+        }
+        else if (c < 0x20)
+        {
+            if (d + 6 >= dest_cap)
+                break;
+            d += snprintf(dest + d, dest_cap - d, "\\u%04x", c);
         }
         else
         {
-            *dest++ = *src;
+            dest[d++] = (char)c;
         }
-        src++;
     }
-    *dest = '\0';
+    dest[d] = '\0';
+}
+
+typedef struct SymReportNode
+{
+    uint32_t stack_id;
+    char *escaped_syms;
+    struct SymReportNode *next;
+} SymReportNode;
+
+#define REPORT_SYM_HASH_SIZE 1024
+static SymReportNode *report_sym_hash[REPORT_SYM_HASH_SIZE] = {NULL};
+
+static const char *get_report_escaped_syms(uint32_t stack_id)
+{
+    if (stack_id == 0)
+        return NULL;
+    uint32_t h = stack_id % REPORT_SYM_HASH_SIZE;
+    for (SymReportNode *n = report_sym_hash[h]; n; n = n->next)
+    {
+        if (n->stack_id == stack_id)
+            return n->escaped_syms;
+    }
+
+    char *syms = vx_stacktrace_symbolize(stack_id);
+    if (!syms)
+        return NULL;
+
+    size_t esc_cap = strlen(syms) * 6 + 1;
+    char *escaped = real_malloc(esc_cap);
+    if (escaped)
+    {
+        escape_json_string(escaped, esc_cap, syms);
+    }
+    if (syms && !vx_is_boot_ptr(syms))
+        real_free(syms);
+
+    if (escaped)
+    {
+        SymReportNode *node = real_malloc(sizeof(SymReportNode));
+        if (node)
+        {
+            node->stack_id = stack_id;
+            node->escaped_syms = escaped;
+            node->next = report_sym_hash[h];
+            report_sym_hash[h] = node;
+            return escaped;
+        }
+        else
+        {
+            real_free(escaped);
+            return NULL;
+        }
+    }
+    return escaped;
+}
+
+static void clear_report_sym_cache(void)
+{
+    for (int i = 0; i < REPORT_SYM_HASH_SIZE; i++)
+    {
+        SymReportNode *n = report_sym_hash[i];
+        while (n)
+        {
+            SymReportNode *next = n->next;
+            if (n->escaped_syms)
+                real_free(n->escaped_syms);
+            real_free(n);
+            n = next;
+        }
+        report_sym_hash[i] = NULL;
+    }
 }
 
 void vx_report_generate(void)
 {
+    /* Force C locale for this thread to ensure JSON floats use '.' not ','
+     * even if the target application called setlocale() with a different locale. */
+    locale_t c_locale = newlocale(LC_ALL_MASK, "C", (locale_t)0);
+    locale_t prev_locale = (locale_t)0;
+    if (c_locale != (locale_t)0)
+    {
+        prev_locale = uselocale(c_locale);
+    }
+
+    vx_telemetry_cleanup();
     vx_analyzer_run();
 
     VxAllocRecord *leaks = NULL;
@@ -132,6 +247,13 @@ void vx_report_generate(void)
     if (!f)
     {
         fprintf(stderr, "Vortex: Failed to open %s for writing\n", out_file);
+        vx_tracker_free_leaks(leaks, leak_count);
+        if (c_locale != (locale_t)0)
+        {
+            if (prev_locale != (locale_t)0)
+                uselocale(prev_locale);
+            freelocale(c_locale);
+        }
         return;
     }
 
@@ -158,13 +280,30 @@ void vx_report_generate(void)
     if (timeline_count > 0)
     {
         uint64_t start_ms = timeline[0].timestamp_ms;
-        for (size_t i = 0; i < timeline_count; i++)
+        size_t max_points = 1500;
+        size_t step = (timeline_count > max_points) ? (timeline_count / max_points) : 1;
+        if (step < 1)
+            step = 1;
+
+        bool first_tl = true;
+        for (size_t i = 0; i < timeline_count; i += step)
         {
-            fprintf(f, "    { \"time_ms\": %llu, \"bytes\": %zu }%s\n",
+            if (!first_tl)
+                fprintf(f, ",\n");
+            first_tl = false;
+            fprintf(f, "    { \"time_ms\": %llu, \"bytes\": %zu }",
                     (unsigned long long)(timeline[i].timestamp_ms - start_ms),
-                    timeline[i].memory_used,
-                    (i < timeline_count - 1) ? "," : "");
+                    timeline[i].memory_used);
         }
+        if ((timeline_count - 1) % step != 0)
+        {
+            if (!first_tl)
+                fprintf(f, ",\n");
+            fprintf(f, "    { \"time_ms\": %llu, \"bytes\": %zu }",
+                    (unsigned long long)(timeline[timeline_count - 1].timestamp_ms - start_ms),
+                    timeline[timeline_count - 1].memory_used);
+        }
+        fprintf(f, "\n");
     }
     fprintf(f, "  ],\n");
 
@@ -176,16 +315,10 @@ void vx_report_generate(void)
         fprintf(f, "      \"address\": \"%p\",\n", errors[i].ptr);
         fprintf(f, "      \"size\": %zu,\n", errors[i].size);
 
-        char *syms = vx_stacktrace_symbolize(errors[i].stack_id);
-        if (syms)
+        const char *escaped_syms = get_report_escaped_syms(errors[i].stack_id);
+        if (escaped_syms)
         {
-            char *escaped_syms = real_malloc(strlen(syms) * 2 + 1);
-            if (escaped_syms) {
-                escape_json_string(escaped_syms, syms);
-                fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
-                real_free(escaped_syms);
-            }
-            real_free(syms);
+            fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
         }
         else
         {
@@ -203,16 +336,10 @@ void vx_report_generate(void)
         fprintf(f, "      \"size\": %zu,\n", leaks[i].size);
         fprintf(f, "      \"thread_id\": %lu,\n", (unsigned long)leaks[i].thread_id);
 
-        char *syms = vx_stacktrace_symbolize(leaks[i].stack_id);
-        if (syms)
+        const char *escaped_syms = get_report_escaped_syms(leaks[i].stack_id);
+        if (escaped_syms)
         {
-            char *escaped_syms = real_malloc(strlen(syms) * 2 + 1);
-            if (escaped_syms) {
-                escape_json_string(escaped_syms, syms);
-                fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
-                real_free(escaped_syms);
-            }
-            real_free(syms);
+            fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
         }
         else
         {
@@ -241,58 +368,46 @@ void vx_report_generate(void)
         if (valid_count > 0)
         {
             VxStackEntry *sorted = real_malloc(valid_count * sizeof(VxStackEntry));
-            size_t j = 0;
-            for (size_t i = 0; i < stack_count; i++)
+            if (sorted)
             {
-                if (stack_entries[i].depth > 0 && stack_entries[i].total_bytes_allocated > 0)
+                size_t j = 0;
+                for (size_t i = 0; i < stack_count; i++)
                 {
-                    sorted[j++] = stack_entries[i];
-                }
-            }
-            qsort(sorted, valid_count, sizeof(VxStackEntry), compare_stack_entries);
-
-            size_t limit = valid_count > 10 ? 10 : valid_count;
-            for (size_t i = 0; i < limit; i++)
-            {
-                fprintf(f, "    {\n");
-                fprintf(f, "      \"rank\": %zu,\n", i + 1);
-                fprintf(f, "      \"total_bytes\": %zu,\n", sorted[i].total_bytes_allocated);
-                fprintf(f, "      \"current_bytes\": %zu,\n", sorted[i].current_bytes_allocated);
-
-                uint32_t original_id = 0;
-                for (size_t k = 0; k < stack_count; k++)
-                {
-                    if (stack_entries[k].hash == sorted[i].hash && stack_entries[k].depth == sorted[i].depth && stack_entries[k].total_bytes_allocated == sorted[i].total_bytes_allocated)
+                    if (stack_entries[i].depth > 0 && stack_entries[i].total_bytes_allocated > 0)
                     {
-                        original_id = k + 1;
-                        break;
+                        sorted[j++] = stack_entries[i];
                     }
                 }
+                qsort(sorted, valid_count, sizeof(VxStackEntry), compare_stack_entries);
 
-                char *syms = NULL;
-                if (original_id > 0)
-                    syms = vx_stacktrace_symbolize(original_id);
-                if (syms)
+                size_t limit = valid_count > 10 ? 10 : valid_count;
+                for (size_t i = 0; i < limit; i++)
                 {
-                    char escaped_syms[8192] = {0};
-                    escape_json_string(escaped_syms, syms);
-                    fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
-                    free(syms);
+                    fprintf(f, "    {\n");
+                    fprintf(f, "      \"rank\": %zu,\n", i + 1);
+                    fprintf(f, "      \"total_bytes\": %zu,\n", sorted[i].total_bytes_allocated);
+                    fprintf(f, "      \"current_bytes\": %zu,\n", sorted[i].current_bytes_allocated);
+
+                    const char *escaped_syms = get_report_escaped_syms(sorted[i].hash);
+                    if (escaped_syms)
+                    {
+                        fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
+                    }
+                    else
+                    {
+                        fprintf(f, "      \"stacktrace\": null\n");
+                    }
+                    fprintf(f, "    }%s\n", (i < limit - 1) ? "," : "");
                 }
-                else
-                {
-                    fprintf(f, "      \"stacktrace\": null\n");
-                }
-                fprintf(f, "    }%s\n", (i < limit - 1) ? "," : "");
+                real_free(sorted);
             }
-            real_free(sorted);
         }
     }
     fprintf(f, "  ],\n");
 
     fprintf(f, "  \"callsite_stats\": [\n");
     bool first_cs = true;
-    for (size_t i = 0; i < 65536; i++)
+    for (size_t i = 0; i < stack_count; i++)
     {
         if (stack_entries[i].depth > 0 && stack_entries[i].alloc_count > 0)
         {
@@ -320,13 +435,10 @@ void vx_report_generate(void)
             fprintf(f, "      \"avg_lifetime_ms\": %f,\n", avg_lifetime_ms);
             fprintf(f, "      \"leak_rate\": %f,\n", leak_rate);
 
-            char *syms = vx_stacktrace_symbolize(i + 1);
-            if (syms)
+            const char *escaped_syms = get_report_escaped_syms(stack_entries[i].hash);
+            if (escaped_syms)
             {
-                char escaped_syms[8192] = {0};
-                escape_json_string(escaped_syms, syms);
                 fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
-                free(syms);
             }
             else
             {
@@ -359,10 +471,10 @@ void vx_report_generate(void)
         fprintf(f, "      \"severity\": \"%s\",\n", sev_str);
         fprintf(f, "      \"pattern\": \"%s\",\n", pat_str);
 
-        char esc_title[256] = {0}, esc_desc[1024] = {0}, esc_sugg[1024] = {0};
-        escape_json_string(esc_title, a->title);
-        escape_json_string(esc_desc, a->description);
-        escape_json_string(esc_sugg, a->suggestion);
+        char esc_title[1024] = {0}, esc_desc[4096] = {0}, esc_sugg[4096] = {0};
+        escape_json_string(esc_title, sizeof(esc_title), a->title);
+        escape_json_string(esc_desc, sizeof(esc_desc), a->description);
+        escape_json_string(esc_sugg, sizeof(esc_sugg), a->suggestion);
 
         fprintf(f, "      \"title\": \"%s\",\n", esc_title);
         fprintf(f, "      \"description\": \"%s\",\n", esc_desc);
@@ -372,16 +484,10 @@ void vx_report_generate(void)
         fprintf(f, "      \"total_bytes\": %zu,\n", a->total_bytes);
         fprintf(f, "      \"avg_lifetime_ms\": %f,\n", a->avg_lifetime_ms);
 
-        char *syms = vx_stacktrace_symbolize(a->stack_id);
-        if (syms)
+        const char *escaped_syms = get_report_escaped_syms(a->stack_id);
+        if (escaped_syms)
         {
-            char *escaped_syms = real_malloc(strlen(syms) * 2 + 1);
-            if (escaped_syms) {
-                escape_json_string(escaped_syms, syms);
-                fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
-                real_free(escaped_syms);
-            }
-            real_free(syms);
+            fprintf(f, "      \"stacktrace\": \"%s\"\n", escaped_syms);
         }
         else
         {
@@ -396,14 +502,20 @@ void vx_report_generate(void)
     vx_analyzer_get_events(&timeline_events, &event_count);
 
     fprintf(f, "  \"timeline_events\": [\n");
+    uint64_t start_ms = (timeline_count > 0) ? timeline[0].timestamp_ms : 0;
     for (size_t i = 0; i < event_count; i++)
     {
+        uint64_t rel_time = 0;
+        if (timeline_count > 0 && timeline_events[i].timestamp_ms >= start_ms)
+        {
+            rel_time = timeline_events[i].timestamp_ms - start_ms;
+        }
         fprintf(f, "    {\n");
-        fprintf(f, "      \"time_ms\": %llu,\n", (unsigned long long)timeline_events[i].timestamp_ms);
+        fprintf(f, "      \"time_ms\": %llu,\n", (unsigned long long)rel_time);
 
-        char esc_type[64] = {0}, esc_label[512] = {0};
-        escape_json_string(esc_type, timeline_events[i].event_type);
-        escape_json_string(esc_label, timeline_events[i].label);
+        char esc_type[256] = {0}, esc_label[2048] = {0};
+        escape_json_string(esc_type, sizeof(esc_type), timeline_events[i].event_type);
+        escape_json_string(esc_label, sizeof(esc_label), timeline_events[i].label);
 
         fprintf(f, "      \"type\": \"%s\",\n", esc_type);
         fprintf(f, "      \"label\": \"%s\"\n", esc_label);
@@ -413,7 +525,7 @@ void vx_report_generate(void)
 
     fprintf(f, "  \"flame_graph\": [\n");
     bool first_fg = true;
-    for (size_t i = 0; i < 65536; i++)
+    for (size_t i = 0; i < stack_count; i++)
     {
         if (stack_entries[i].depth > 0 && stack_entries[i].total_bytes_allocated > 0)
         {
@@ -430,9 +542,25 @@ void vx_report_generate(void)
                 Dl_info dlinfo;
                 if (dladdr(ip, &dlinfo) && dlinfo.dli_sname)
                 {
-                    char esc_name[256] = {0};
-                    escape_json_string(esc_name, dlinfo.dli_sname);
-                    fprintf(f, "\"%s\"", esc_name);
+                    char demangled_buf[512];
+                    const char *display_name = dlinfo.dli_sname;
+                    if (vx_demangle(dlinfo.dli_sname, demangled_buf, sizeof(demangled_buf)))
+                    {
+                        display_name = demangled_buf;
+                    }
+
+                    size_t esc_name_cap = strlen(display_name) * 6 + 1;
+                    char *esc_name = real_malloc(esc_name_cap);
+                    if (esc_name)
+                    {
+                        escape_json_string(esc_name, esc_name_cap, display_name);
+                        fprintf(f, "\"%s\"", esc_name);
+                        real_free(esc_name);
+                    }
+                    else
+                    {
+                        fprintf(f, "\"%p\"", ip);
+                    }
                 }
                 else
                 {
@@ -453,7 +581,7 @@ void vx_report_generate(void)
     size_t lt_counts[6] = {0};
     size_t lt_bytes[6] = {0};
 
-    for (size_t i = 0; i < 65536; i++)
+    for (size_t i = 0; i < stack_count; i++)
     {
         if (stack_entries[i].depth > 0 && stack_entries[i].alloc_count > 0)
         {
@@ -492,5 +620,16 @@ void vx_report_generate(void)
     fprintf(f, "  }\n");
 
     fprintf(f, "}\n");
+    clear_report_sym_cache();
     fclose(f);
+    vx_tracker_free_leaks(leaks, leak_count);
+    vx_stacktrace_free_all(stack_entries, stack_count);
+
+    /* Restore thread locale */
+    if (c_locale != (locale_t)0)
+    {
+        if (prev_locale != (locale_t)0)
+            uselocale(prev_locale);
+        freelocale(c_locale);
+    }
 }

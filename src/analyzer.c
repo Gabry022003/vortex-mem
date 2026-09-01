@@ -100,7 +100,7 @@ void vx_analyzer_run(void)
         }
     }
 
-    for (size_t i = 0; i < 65536; i++)
+    for (size_t i = 0; i < count; i++)
     {
         VxStackEntry *e = &entries[i];
         if (e->depth == 0 || e->alloc_count == 0)
@@ -115,7 +115,7 @@ void vx_analyzer_run(void)
         }
 
         VxAnalysis a = {0};
-        a.stack_id = i + 1;
+        a.stack_id = e->hash;
         a.alloc_count = e->alloc_count;
         a.free_count = e->free_count;
         a.total_bytes = e->total_bytes_allocated;
@@ -131,6 +131,20 @@ void vx_analyzer_run(void)
                      e->total_bytes_allocated / e->alloc_count, e->alloc_count, leak_rate);
             snprintf(a.suggestion, sizeof(a.suggestion),
                      "Add free() after processing each element, or use a memory pool for batch allocations.");
+            add_result(&a);
+            continue;
+        }
+
+        if (e->alloc_count > 1 && e->free_count == 0)
+        {
+            a.pattern = VX_PATTERN_LOOP_LEAK;
+            a.severity = VX_SEVERITY_WARNING;
+            snprintf(a.title, sizeof(a.title), "Repeated Unfreed Allocations");
+            snprintf(a.description, sizeof(a.description),
+                     "%zu allocations of ~%zu bytes never freed (%zu bytes total).",
+                     e->alloc_count, e->total_bytes_allocated / e->alloc_count, e->total_bytes_allocated);
+            snprintf(a.suggestion, sizeof(a.suggestion),
+                     "Ensure all allocated objects in this loop or batch are freed upon completion.");
             add_result(&a);
             continue;
         }
@@ -173,7 +187,7 @@ void vx_analyzer_run(void)
                      "%zu allocations of %zu-%zu bytes with avg lifetime %.2fms.",
                      e->alloc_count, e->min_size, e->max_size, avg_lifetime_ms);
             snprintf(a.suggestion, sizeof(a.suggestion),
-                     "Consider using a stack buffer (char buf[%zu]) or alloca() to avoid heap overhead.",
+                     "Consider using a stack buffer (char buf[%zu]) or std::array / Small Buffer Optimization to avoid heap overhead.",
                      e->max_size);
             add_result(&a);
             continue;
@@ -208,6 +222,7 @@ void vx_analyzer_run(void)
             continue;
         }
     }
+    vx_stacktrace_free_all(entries, count);
 }
 
 void vx_analyzer_get_results(VxAnalysis **out, size_t *out_count)
@@ -220,4 +235,22 @@ void vx_analyzer_get_events(VxTimelineEvent **out, size_t *out_count)
 {
     *out = events;
     *out_count = event_count;
+}
+
+void vx_analyzer_cleanup(void)
+{
+    if (results && result_capacity > 0)
+    {
+        munmap(results, result_capacity * sizeof(VxAnalysis));
+        results = NULL;
+        result_count = 0;
+        result_capacity = 0;
+    }
+    if (events && event_capacity > 0)
+    {
+        munmap(events, event_capacity * sizeof(VxTimelineEvent));
+        events = NULL;
+        event_count = 0;
+        event_capacity = 0;
+    }
 }

@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="/assets/logo.png" alt="Vortex Memory Profiler Logo" width="600" />
+  <img src="assets/logo.png" alt="Vortex Memory Profiler Logo" width="600" />
 
   <h1>Vortex Memory Profiler</h1>
   <p>
@@ -23,19 +23,25 @@ Vortex was built to solve this by offering **real-time observability**. It bridg
 Vortex is designed with a strict zero-external-dependency philosophy for its backend, relying entirely on advanced Linux OS internals and system calls to ensure minimal interference with the target application.
 
 ### 1. Zero-Interference Heap Management
-To track allocations without triggering infinite recursion within the standard library's `malloc`, Vortex manages its internal state by bypassing the heap entirely. Internal data structures and lock-free hash tables are allocated directly via `mmap` with `MAP_PRIVATE | MAP_ANONYMOUS`. This ensures that the profiler's memory footprint remains strictly isolated from the target process.
+To track allocations without triggering infinite recursion within the standard library's `malloc`, Vortex manages its internal state by bypassing the heap entirely. Internal data structures and hash tables are allocated directly via `mmap` with `MAP_PRIVATE | MAP_ANONYMOUS`, while callsites are retrieved through lock-free atomic chunks. This ensures that the profiler's memory footprint remains strictly isolated from the target process.
 
 ### 2. Enterprise-Grade Concurrency & Multi-Process Safety
 Vortex is engineered for heavily multi-threaded and multi-processed environments, processing millions of allocations per second:
-- **Striped Locking**: Thread safety is achieved through an advanced hash-based Striped Locking architecture. This completely eliminates global mutex bottlenecks, allowing multiple threads to allocate memory simultaneously without contention.
-- **Background Resizing**: The internal tracker expands its memory maps dynamically using a detached background thread, guaranteeing zero "stop-the-world" latency spikes for the target application.
+- **Striped Locking**: Thread safety is achieved through an advanced hash-based Striped Locking architecture (64 stripes aligned to CPU cache lines). This completely eliminates global mutex bottlenecks, allowing multiple threads to allocate memory simultaneously without contention.
+- **Dynamic Striped Resizing**: The internal tracker expands its memory maps dynamically on a per-stripe basis. By isolating reallocation and rehashing to individual stripes, lock contention is localized, preventing global "stop-the-world" latency spikes for the target application.
 - **Process Bifurcation**: The profiler gracefully handles process cloning (e.g., daemonization or worker spawning). By registering `pthread_atfork` handlers, Vortex safely suspends its internal state before a `fork()` and safely resumes in both parent and child processes, dynamically redirecting telemetry and reports to prevent file descriptor conflicts.
 
 ### 3. Integrated Telemetry Engine
-Vortex eliminates the need for external runtime dependencies (like Python or Node.js) on the backend. It uses a **Lock-Free MPSC Ring Buffer** to instantly offload networking tasks from the application's memory allocation path. A dedicated background thread relays these events to a highly efficient C server, which utilizes an asynchronous non-blocking event loop (`epoll`/`select`) to broadcast real-time telemetry to the frontend via Server-Sent Events (SSE).
+Vortex eliminates the need for external runtime dependencies (like Python or Node.js) on the backend. A dedicated background thread asynchronously samples telemetry and streams real-time metrics over UDP to a highly efficient C server, which utilizes an asynchronous non-blocking event loop (`select`) to broadcast live metrics to the frontend via Server-Sent Events (SSE).
 
 ### 4. Dynamic Symbol Resolution
-Raw memory addresses offer limited debugging value. Vortex automatically resolves stack traces back to their original source files and line numbers. It achieves this dynamically by combining `dladdr` to locate ELF binaries and `popen` interfaces to invoke `addr2line` directly within the C runtime, emitting immediately readable JSON reports.
+Raw memory addresses offer limited debugging value. Vortex automatically resolves stack traces back to their original source files and line numbers. It achieves this dynamically by combining `dladdr` to locate ELF binaries, an 8192-slot symbol cache, and direct child execution (`fork`/`exec` with sanitized environment) to invoke `addr2line` directly within the C runtime, emitting immediately readable JSON reports.
+
+### 5. Smart Heuristic Analysis
+Vortex includes an integrated diagnostic engine that analyzes memory behavior patterns:
+- **Loop Leaks & Forgotten Frees**: Pinpoints allocations in loops or functions that are never deallocated.
+- **Growing Containers**: Flags unbounded collection growths that are never drained.
+- **Optimization Candidates**: Suggests stack buffer candidates for short-lived allocations (<5ms) and memory pool/slab candidates for frequent identical-sized buffers.
 
 ## Core Capabilities
 
@@ -48,7 +54,7 @@ Vortex operates in two primary modes depending on the developer's needs:
 
 ## Getting Started
 
-Vortex currently supports Unix-like environments via `LD_PRELOAD` (Linux, WSL, MSYS2) and macOS via `DYLD_INSERT_LIBRARIES`.
+Vortex currently supports Linux environments and Windows via WSL (Windows Subsystem for Linux) using `LD_PRELOAD`.
 
 ### Building the Project
 
@@ -79,10 +85,24 @@ The C-Server will automatically start, and your default browser will open `http:
 
 ### Activating Heavy Mode
 
-To enable memory corruption detection (Redzones and Quarantine), run your executable with the following environment variables:
+To enable memory corruption detection (Redzones and Quarantine), you can simply use the `--heavy` flag:
+
+```bash
+./vortex run --heavy ./bin/your_executable
+```
+
+Alternatively, you can pass the environment variables directly:
 
 ```bash
 env VORTEX_RED_ZONES=1 VORTEX_QUARANTINE=1 ./vortex run ./bin/your_executable
+```
+
+### Running Headless / CI Mode
+
+To run in automated pipelines without launching the web server or opening a browser:
+
+```bash
+./vortex run --ci ./bin/your_executable
 ```
 
 ## Testing

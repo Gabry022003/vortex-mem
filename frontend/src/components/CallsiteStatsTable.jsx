@@ -6,33 +6,6 @@ function CallsiteStatsTable({ data }) {
   if (!data || data.length === 0) return null;
 
   const columns = [
-    {
-      key: 'stacktrace',
-      label: 'Callsite',
-      sortable: false,
-      render: (val, row) => {
-        return null;
-      }
-    },
-    { key: 'alloc_count', label: 'Allocs' },
-    { key: 'free_count', label: 'Frees' },
-    {
-      key: 'leak_rate',
-      label: 'Leak Rate %',
-      render: (val) => {
-        let colorClass = 'green';
-        if (val > 50) colorClass = 'red';
-        else if (val >= 10) colorClass = 'yellow';
-        return <span className={`pill ${colorClass}`}>{val.toFixed(1)}%</span>;
-      }
-    },
-    { key: 'total_bytes', label: 'Total Bytes', render: (val) => formatBytes(val) },
-    { key: 'current_bytes', label: 'Current Held', render: (val) => formatBytes(val) },
-    { key: 'avg_lifetime_ms', label: 'Avg Lifetime', render: (val) => formatDuration(val) },
-    { key: 'full_stacktrace', label: 'Stack Trace', sortable: false }
-  ];
-
-  const modifiedColumns = [
     { key: 'callsite', label: 'Callsite' },
     { key: 'alloc_count', label: 'Allocs' },
     { key: 'free_count', label: 'Frees' },
@@ -53,14 +26,22 @@ function CallsiteStatsTable({ data }) {
   ];
 
   const transformedData = data.map((item, idx) => {
-    let firstLine = 'Unknown';
+    let callsiteDisplay = 'Unknown';
     if (item.stacktrace) {
-      firstLine = item.stacktrace.split(/[\n;]/)[0];
+      const lines = item.stacktrace.split('\n').map(l => l.trim()).filter(Boolean);
+      const symbol = lines[0] || 'Unknown';
+      const fileInfoLine = lines.find(l => l.startsWith('at ') && !l.includes('??:'));
+      if (fileInfoLine) {
+        const fileInfo = fileInfoLine.replace(/^at\s+/, '');
+        callsiteDisplay = `${symbol} (${fileInfo})`;
+      } else {
+        callsiteDisplay = symbol;
+      }
     }
     return {
       ...item,
       id: idx,
-      callsite: firstLine,
+      callsite: callsiteDisplay,
     };
   });
 
@@ -70,7 +51,7 @@ function CallsiteStatsTable({ data }) {
       <InteractiveTable
         rowKey="id"
         data={transformedData}
-        columns={modifiedColumns}
+        columns={columns}
       />
     </div>
   );

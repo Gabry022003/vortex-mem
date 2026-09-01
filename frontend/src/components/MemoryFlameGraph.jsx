@@ -5,11 +5,11 @@ function buildFlameTree(data) {
   const root = { name: 'all', value: 0, children: [], depth: 0 };
   for (const entry of data) {
     let node = root;
-    for (let i = 0; i < entry.frames.length; i++) {
+    for (let i = entry.frames.length - 1; i >= 0; i--) {
       const frame = entry.frames[i];
       let child = node.children.find(c => c.name === frame);
       if (!child) {
-        child = { name: frame, value: 0, children: [], depth: i + 1 };
+        child = { name: frame, value: 0, children: [], depth: entry.frames.length - i };
         node.children.push(child);
       }
       child.value += entry.bytes;
@@ -41,7 +41,7 @@ function FlameNode({ node, totalValue, onZoom, maxDepth }) {
       </div>
       {node.children && node.children.length > 0 && (
         <div className="flame-row" style={{ width: '100%' }}>
-          {node.children.sort((a,b) => b.value - a.value).map((child, i) => (
+          {[...node.children].sort((a,b) => b.value - a.value).map((child, i) => (
             <FlameNode 
               key={i} 
               node={child} 

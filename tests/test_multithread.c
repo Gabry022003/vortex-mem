@@ -10,6 +10,7 @@
 void *thread_worker(void *arg)
 {
     int thread_id = *(int *)arg;
+    (void)thread_id;
     void *ptrs[100];
 
     for (int i = 0; i < ALLOCS_PER_THREAD; i++)

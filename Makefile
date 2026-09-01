@@ -1,7 +1,7 @@
 CC = gcc
 CXX = g++
-CFLAGS = -Wall -Wextra -O2 -g -fPIC -D_GNU_SOURCE
-CXXFLAGS = -Wall -Wextra -O2 -g -fPIC -D_GNU_SOURCE
+CFLAGS = -Wall -Wextra -O2 -g -fPIC -fno-omit-frame-pointer -D_GNU_SOURCE
+CXXFLAGS = -Wall -Wextra -O2 -g -fPIC -fno-omit-frame-pointer -D_GNU_SOURCE -std=c++17
 LDFLAGS = -shared -ldl -lpthread
 
 SRC_DIR = src
@@ -25,7 +25,16 @@ SERVER_BIN = $(BIN_DIR)/vortex_server
 MULTITHREAD_SRC = $(TEST_DIR)/test_multithread.c
 MULTITHREAD_BIN = $(BIN_DIR)/test_multithread
 
-all: $(LIB) $(TEST_BIN) $(GOD_MODE_BIN) $(SERVER_BIN) $(MULTITHREAD_BIN)
+BENCHMARK_SRC = $(TEST_DIR)/benchmark.c
+BENCHMARK_BIN = $(BIN_DIR)/benchmark
+
+TEST_CPP_SRC = $(TEST_DIR)/test_cpp.cpp
+TEST_CPP_BIN = $(BIN_DIR)/test_cpp
+
+ROBUSTNESS_SRC = $(TEST_DIR)/test_robustness.c
+ROBUSTNESS_BIN = $(BIN_DIR)/test_robustness
+
+all: $(LIB) $(TEST_BIN) $(GOD_MODE_BIN) $(SERVER_BIN) $(MULTITHREAD_BIN) $(BENCHMARK_BIN) $(TEST_CPP_BIN) $(ROBUSTNESS_BIN)
 
 $(LIB): $(OBJS)
 	@mkdir -p $(BIN_DIR)
@@ -47,6 +56,18 @@ $(MULTITHREAD_BIN): $(MULTITHREAD_SRC)
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) -rdynamic $< -o $@ -lpthread
 
+$(BENCHMARK_BIN): $(BENCHMARK_SRC)
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) -rdynamic $< -o $@ -lpthread
+
+$(TEST_CPP_BIN): $(TEST_CPP_SRC)
+	@mkdir -p $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) -rdynamic $< -o $@
+
+$(ROBUSTNESS_BIN): $(ROBUSTNESS_SRC)
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) -rdynamic $< -o $@
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -62,6 +83,6 @@ test: all
 	./$(RUNNER_BIN)
 
 clean:
-	rm -f $(OBJS) $(LIB) $(TEST_BIN) $(GOD_MODE_BIN) $(SERVER_BIN) vortex_report*.json
+	rm -f $(OBJS) $(LIB) $(TEST_BIN) $(GOD_MODE_BIN) $(SERVER_BIN) $(MULTITHREAD_BIN) $(BENCHMARK_BIN) $(TEST_CPP_BIN) $(ROBUSTNESS_BIN) $(RUNNER_BIN) vortex_report*.json test_report*.json
 
 .PHONY: all test clean

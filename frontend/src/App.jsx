@@ -13,9 +13,10 @@ import { formatBytes } from './utils';
 function App() {
   const [data, setData] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [reportFile, setReportFile] = useState('vortex_report.json');
 
   const loadReport = () => {
-    fetch('/vortex_report.json?t=' + Date.now())
+    fetch(`/${reportFile}?t=` + Date.now())
       .then(res => {
         if (!res.ok) throw new Error('Not found');
         return res.json();
@@ -121,7 +122,25 @@ function App() {
         <h1 style={{ fontSize: '2.5em', fontWeight: 800, margin: 0 }}>
           <span style={{ color: '#fff' }}>Vortex</span> <span className="text-gradient">Memory UI</span>
         </h1>
-        <button className="btn-view" onClick={() => setData(null)}>Load Another File</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <input
+            type="text"
+            value={reportFile}
+            onChange={(e) => setReportFile(e.target.value)}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '6px',
+              border: '1px solid #444',
+              background: '#222',
+              color: '#fff',
+              fontSize: '1em',
+              outline: 'none'
+            }}
+            placeholder="vortex_report.json"
+          />
+          <button className="btn-view" onClick={loadReport} style={{ background: '#333' }}>Reload</button>
+          <button className="btn-view" onClick={() => setData(null)}>Clear</button>
+        </div>
       </div>
 
       { }

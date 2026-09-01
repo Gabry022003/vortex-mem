@@ -8,6 +8,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+
 void cause_leak()
 {
     volatile char *ptr = (volatile char *)malloc(1024);
@@ -30,6 +33,25 @@ void cause_overflow()
         ptr[i] = 'A';
     }
     free((void *)ptr);
+}
+
+void cause_underflow()
+{
+    volatile char *ptr = (volatile char *)malloc(20);
+    ptr[-1] = 'Z';
+    free((void *)ptr);
+}
+
+void cause_use_after_free()
+{
+    volatile char *ptr = (volatile char *)malloc(64);
+    free((void *)ptr);
+    ptr[0] = 'W';
+    for (int i = 0; i < 1100; i++)
+    {
+        void *dummy = malloc(64);
+        free(dummy);
+    }
 }
 
 void cause_spike()
@@ -57,7 +79,9 @@ int main()
     cause_leak();
     cause_double_free();
     cause_overflow();
+    cause_underflow();
+    cause_use_after_free();
 
-    printf("Done. Check vortex_report.html\n");
+    printf("Done. Check the Vortex Dashboard or vortex_report.json\n");
     return 0;
 }
