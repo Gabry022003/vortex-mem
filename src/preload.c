@@ -410,9 +410,6 @@ VX_EXPORT void free(void *ptr)
         }
         else
         {
-            /* Pointer was not tracked by Vortex — likely allocated before LD_PRELOAD
-             * was active, or by a library function we don't intercept. Log the anomaly
-             * but ALWAYS forward to real_free() to prevent leaking memory. */
             if (!was_in_hook && vx_config.track_allocs)
             {
                 uint32_t stack_id = vx_stacktrace_register();

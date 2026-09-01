@@ -123,17 +123,15 @@ uint32_t vx_stacktrace_register(void)
 
     void *frames[VX_MAX_STACK_FRAMES + 4];
     int depth = backtrace(frames, vx_config.stack_depth + 4);
-    int skip = 2; /* Skip vx_stacktrace_register and malloc/calloc */
+    int skip = 2;
 
-    /* Skip additional C++ operator new/new[] frames so that the first
-     * visible frame is the actual user call site, not 'operator new'. */
     while (skip < depth)
     {
         Dl_info dli;
         if (dladdr(frames[skip], &dli) && dli.dli_sname)
         {
-            if (strncmp(dli.dli_sname, "_Znw", 4) == 0 || /* operator new */
-                strncmp(dli.dli_sname, "_Zna", 4) == 0 || /* operator new[] */
+            if (strncmp(dli.dli_sname, "_Znw", 4) == 0 ||
+                strncmp(dli.dli_sname, "_Zna", 4) == 0 ||
                 strncmp(dli.dli_sname, "operator new", 12) == 0)
             {
                 skip++;
@@ -621,9 +619,6 @@ char *vx_stacktrace_symbolize(uint32_t id)
         if (dladdr(entry->frames[i], &info) && info.dli_fname)
         {
             binaries[i] = info.dli_fname;
-            /* backtrace() returns return addresses (instruction after CALL).
-             * Subtract 1 to point within the CALL instruction so that
-             * addr2line maps to the correct source line. */
             offsets[i] = (void *)((char *)entry->frames[i] - (char *)info.dli_fbase - 1);
         }
     }

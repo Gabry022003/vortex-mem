@@ -33,7 +33,6 @@ typedef struct
 static VxBootMmapBlock vx_boot_mmaps[VX_BOOT_MAX_MMAPS];
 static size_t vx_boot_mmap_count = 0;
 
-/* Atomic range tracking for mmap'd boot blocks — fast-path avoids the mutex */
 static _Atomic uintptr_t vx_boot_mmap_lo = UINTPTR_MAX;
 static _Atomic uintptr_t vx_boot_mmap_hi = 0;
 
@@ -72,7 +71,6 @@ void *vx_boot_alloc(size_t size)
         vx_boot_mmaps[vx_boot_mmap_count].size = aligned_size;
         vx_boot_mmap_count++;
 
-        /* Update atomic range bounds for fast-path rejection in vx_is_boot_ptr */
         uintptr_t block_lo = (uintptr_t)user_ptr;
         uintptr_t block_hi = block_lo + aligned_size;
         uintptr_t cur_lo = atomic_load_explicit(&vx_boot_mmap_lo, __ATOMIC_RELAXED);
@@ -122,20 +120,16 @@ bool vx_is_boot_ptr(void *ptr)
 
     char *p = (char *)ptr;
 
-    /* Fast path: check static bump buffer (no lock needed) */
     if (p >= vx_boot_mem && p < vx_boot_mem + VX_BOOT_CAPACITY)
     {
         return true;
     }
 
-    /* Fast path: no mmap blocks allocated yet */
     if (__atomic_load_n(&vx_boot_mmap_count, __ATOMIC_RELAXED) == 0)
     {
         return false;
     }
 
-    /* Fast path: pointer outside the gross range of all mmap'd boot blocks.
-     * This avoids the mutex for the vast majority of free() calls. */
     uintptr_t addr = (uintptr_t)p;
     uintptr_t lo = atomic_load_explicit(&vx_boot_mmap_lo, __ATOMIC_RELAXED);
     uintptr_t hi = atomic_load_explicit(&vx_boot_mmap_hi, __ATOMIC_RELAXED);
@@ -144,7 +138,6 @@ bool vx_is_boot_ptr(void *ptr)
         return false;
     }
 
-    /* Slow path: pointer is within the gross range, do precise per-block check */
     pthread_mutex_lock(&vx_boot_lock);
     for (size_t i = 0; i < vx_boot_mmap_count; i++)
     {

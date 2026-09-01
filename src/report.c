@@ -193,8 +193,6 @@ static void clear_report_sym_cache(void)
 
 void vx_report_generate(void)
 {
-    /* Force C locale for this thread to ensure JSON floats use '.' not ','
-     * even if the target application called setlocale() with a different locale. */
     locale_t c_locale = newlocale(LC_ALL_MASK, "C", (locale_t)0);
     locale_t prev_locale = (locale_t)0;
     if (c_locale != (locale_t)0)
@@ -625,7 +623,6 @@ void vx_report_generate(void)
     vx_tracker_free_leaks(leaks, leak_count);
     vx_stacktrace_free_all(stack_entries, stack_count);
 
-    /* Restore thread locale */
     if (c_locale != (locale_t)0)
     {
         if (prev_locale != (locale_t)0)
