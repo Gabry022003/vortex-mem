@@ -4,7 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vortex Memory Profiler — Real-Time C/C++ Memory Observability</title>
+  <meta name="description" content="High-performance real-time C and C++ memory profiling and corruption detection framework." />
   <link rel="icon" type="image/png" href="assets/logo.png" />
+  <meta property="og:title" content="Vortex Memory Profiler — Real-Time C/C++ Memory Observability" />
+  <meta property="og:description" content="Native speed memory profiling, live telemetry streaming, buffer overflow and use-after-free detection for C & C++." />
+  <meta property="og:image" content="https://gabry022003.github.io/vortex-mem/assets/logo.png" />
+  <meta property="og:url" content="https://gabry022003.github.io/vortex-mem/" />
+  <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -41,7 +47,26 @@
       overflow-x: hidden;
       background-image: 
         radial-gradient(circle at 15% 15%, rgba(0, 210, 255, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 85% 65%, rgba(58, 123, 213, 0.08) 0%, transparent 45%);
+        radial-gradient(circle at 85% 65%, rgba(58, 123, 213, 0.08) 0%, transparent 45%),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+    }
+
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.45;
+    }
+
+    .hero, section, footer {
+      position: relative;
+      z-index: 1;
     }
 
     /* Language Switcher Display Logic */
@@ -634,6 +659,8 @@
 </head>
 <body class="lang-en">
 
+  <canvas id="bg-canvas"></canvas>
+
   <!-- Header / Navbar -->
   <header>
     <div class="container nav-container">
@@ -1107,7 +1134,47 @@
       });
     }
 
-    // Initialize Language from localStorage or Browser Preference
+    const bgCanvas = document.getElementById('bg-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    let particles = [];
+
+    function resizeBg() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeBg);
+    resizeBg();
+
+    for (let i = 0; i < 45; i++) {
+      particles.push({
+        x: Math.random() * bgCanvas.width,
+        y: Math.random() * bgCanvas.height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 2 + 1
+      });
+    }
+
+    function animateBg() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      bgCtx.fillStyle = 'rgba(0, 210, 255, 0.45)';
+
+      for (let p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = bgCanvas.width;
+        if (p.x > bgCanvas.width) p.x = 0;
+        if (p.y < 0) p.y = bgCanvas.height;
+        if (p.y > bgCanvas.height) p.y = 0;
+
+        bgCtx.beginPath();
+        bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        bgCtx.fill();
+      }
+      requestAnimationFrame(animateBg);
+    }
+    animateBg();
+
     document.addEventListener('DOMContentLoaded', () => {
       const savedLang = localStorage.getItem('vortex_lang');
       if (savedLang) {

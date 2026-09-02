@@ -6,6 +6,13 @@
   <p>
     <strong>A high-performance, real-time memory profiling and corruption detection tool for C and C++ applications.</strong>
   </p>
+
+  <p>
+    <a href="https://github.com/Gabry022003/vortex-mem/actions/workflows/ci.yml"><img src="https://github.com/Gabry022003/vortex-mem/actions/workflows/ci.yml/badge.svg" alt="Vortex CI Status" /></a>
+    <a href="https://gabry022003.github.io/vortex-mem/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-00d2ff?logo=github" alt="Documentation Site" /></a>
+    <a href="tests/"><img src="https://img.shields.io/badge/tests-18%2F18%20passing-2ecc71" alt="Test Suite" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow" alt="License" /></a>
+  </p>
 </div>
 
 ## Overview
