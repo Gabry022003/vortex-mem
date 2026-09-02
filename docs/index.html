@@ -1,19 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Primary Meta Tags -->
   <title>Vortex Memory Profiler — Real-Time C/C++ Memory Observability</title>
-  <meta name="description" content="High-performance real-time C and C++ memory profiling and corruption detection framework." />
+  <meta name="title" content="Vortex Memory Profiler — Real-Time C/C++ Memory Observability" />
+  <meta name="description"
+    content="High-performance real-time C and C++ memory profiling and corruption detection framework. Zero recompilation, sub-3% latency." />
   <link rel="icon" type="image/png" href="assets/logo.png" />
-  <meta property="og:title" content="Vortex Memory Profiler — Real-Time C/C++ Memory Observability" />
-  <meta property="og:description" content="Native speed memory profiling, live telemetry streaming, buffer overflow and use-after-free detection for C & C++." />
-  <meta property="og:image" content="https://gabry022003.github.io/vortex-mem/assets/logo.png" />
-  <meta property="og:url" content="https://gabry022003.github.io/vortex-mem/" />
+
+
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://gabry022003.github.io/vortex-mem/" />
+  <meta property="og:site_name" content="Vortex Memory Profiler" />
+  <meta property="og:title" content="Vortex Memory Profiler — Real-Time C/C++ Memory Observability" />
+  <meta property="og:description"
+    content="High-performance real-time C and C++ memory profiling and corruption detection framework. Zero recompilation, sub-3% latency." />
+  <meta property="og:image" content="https://gabry022003.github.io/vortex-mem/assets/og-preview.jpg" />
+  <meta property="og:image:secure_url" content="https://gabry022003.github.io/vortex-mem/assets/og-preview.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Vortex Memory Profiler" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://gabry022003.github.io/vortex-mem/" />
+  <meta name="twitter:title" content="Vortex Memory Profiler — Real-Time C/C++ Memory Observability" />
+  <meta name="twitter:description"
+    content="High-performance real-time C and C++ memory profiling and corruption detection framework. Zero recompilation, sub-3% latency." />
+  <meta name="twitter:image" content="https://gabry022003.github.io/vortex-mem/assets/og-preview.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
   <style>
     :root {
       --bg-dark: #080b11;
@@ -45,7 +67,7 @@
       font-family: var(--font-main);
       line-height: 1.6;
       overflow-x: hidden;
-      background-image: 
+      background-image:
         radial-gradient(circle at 15% 15%, rgba(0, 210, 255, 0.08) 0%, transparent 40%),
         radial-gradient(circle at 85% 65%, rgba(58, 123, 213, 0.08) 0%, transparent 45%),
         linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
@@ -64,20 +86,28 @@
       opacity: 0.45;
     }
 
-    .hero, section, footer {
+    .hero,
+    section,
+    footer {
       position: relative;
       z-index: 1;
     }
 
     /* Language Switcher Display Logic */
-    body.lang-en .lang-it { display: none !important; }
-    body.lang-it .lang-en { display: none !important; }
+    body.lang-en .lang-it {
+      display: none !important;
+    }
+
+    body.lang-it .lang-en {
+      display: none !important;
+    }
 
     a {
       color: var(--primary);
       text-decoration: none;
       transition: all 0.2s ease;
     }
+
     a:hover {
       text-shadow: 0 0 10px var(--primary-glow);
     }
@@ -355,9 +385,18 @@
       height: 12px;
       border-radius: 50%;
     }
-    .dot-red { background: #ff5f56; }
-    .dot-yellow { background: #ffbd2e; }
-    .dot-green { background: #27c93f; }
+
+    .dot-red {
+      background: #ff5f56;
+    }
+
+    .dot-yellow {
+      background: #ffbd2e;
+    }
+
+    .dot-green {
+      background: #27c93f;
+    }
 
     .terminal-title {
       font-family: var(--font-mono);
@@ -374,11 +413,26 @@
       overflow-x: auto;
     }
 
-    .t-prompt { color: var(--primary); }
-    .t-cmd { color: #fff; font-weight: 600; }
-    .t-dim { color: #64748b; }
-    .t-success { color: var(--success); }
-    .t-warn { color: var(--warning); }
+    .t-prompt {
+      color: var(--primary);
+    }
+
+    .t-cmd {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .t-dim {
+      color: #64748b;
+    }
+
+    .t-success {
+      color: var(--success);
+    }
+
+    .t-warn {
+      color: var(--warning);
+    }
 
     /* Features Grid */
     section {
@@ -480,7 +534,8 @@
       text-align: left;
     }
 
-    th, td {
+    th,
+    td {
       padding: 18px 24px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
@@ -695,7 +750,9 @@
       color: #fff;
     }
 
-    .quick-install-code::-webkit-scrollbar { display: none; }
+    .quick-install-code::-webkit-scrollbar {
+      display: none;
+    }
 
     .prompt-sym {
       color: var(--primary);
@@ -855,7 +912,9 @@
       white-space: nowrap;
     }
 
-    .preview-table tr:last-child td { border-bottom: none; }
+    .preview-table tr:last-child td {
+      border-bottom: none;
+    }
 
     /* FAQ Section */
     .faq-list {
@@ -893,7 +952,9 @@
       user-select: none;
     }
 
-    .faq-summary::-webkit-details-marker { display: none; }
+    .faq-summary::-webkit-details-marker {
+      display: none;
+    }
 
     .faq-icon {
       font-size: 1.1rem;
@@ -958,69 +1019,233 @@
     }
 
     @media (max-width: 768px) {
-      .nav-container { height: 64px; }
-      .brand { font-size: 1.15rem; gap: 10px; }
-      .brand img { height: 32px; }
-      .nav-links { display: none; }
-      .nav-actions { gap: 10px; }
-      .btn-github { padding: 6px 12px; font-size: 0.8rem; }
-      
-      .hero { padding: 50px 0 35px; }
-      .hero h1 { font-size: 2.1rem; line-height: 1.2; letter-spacing: -0.8px; margin-bottom: 18px; }
-      .hero-p { font-size: 1rem; line-height: 1.6; margin-bottom: 26px; }
-      .hero-actions { flex-direction: column; width: 100%; gap: 12px; }
-      .btn-primary, .btn-secondary { width: 100%; justify-content: center; padding: 14px 20px; font-size: 0.95rem; }
+      .nav-container {
+        height: 64px;
+      }
 
-      .quick-install { flex-direction: column; align-items: stretch; gap: 10px; text-align: left; padding: 12px; }
-      .quick-install-code { font-size: 0.75rem; }
-      .quick-install .copy-btn { align-self: flex-end; }
+      .brand {
+        font-size: 1.15rem;
+        gap: 10px;
+      }
 
-      .badges { gap: 6px; margin-bottom: 18px; }
-      .badge { font-size: 0.72rem; padding: 4px 10px; }
+      .brand img {
+        height: 32px;
+      }
 
-      .terminal-box { margin-top: 30px; }
-      .terminal-body { font-size: 0.78rem; padding: 14px; overflow-x: auto; line-height: 1.6; }
+      .nav-links {
+        display: none;
+      }
 
-      .section-title { font-size: 1.85rem; letter-spacing: -0.6px; }
-      .section-desc { font-size: 0.95rem; }
-      section { padding: 55px 0; }
+      .nav-actions {
+        gap: 10px;
+      }
 
-      .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
-      table { min-width: 580px; }
-      th, td { padding: 12px 14px; font-size: 0.85rem; }
+      .btn-github {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+      }
 
-      .grid-3 { grid-template-columns: 1fr; gap: 16px; }
-      .card { padding: 22px 18px; }
+      .hero {
+        padding: 50px 0 35px;
+      }
 
-      .mode-card { padding: 24px 18px; }
-      .code-block { flex-direction: column; align-items: stretch; gap: 10px; }
-      .code-block code { font-size: 0.75rem; overflow-x: auto; }
-      .code-block .copy-btn { align-self: flex-end; }
+      .hero h1 {
+        font-size: 2.1rem;
+        line-height: 1.2;
+        letter-spacing: -0.8px;
+        margin-bottom: 18px;
+      }
 
-      .faq-summary { font-size: 0.95rem; padding: 16px 18px; }
-      .faq-answer { font-size: 0.88rem; padding: 0 18px 16px; }
+      .hero-p {
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 26px;
+      }
 
-      .arch-item { flex-direction: column; gap: 10px; padding: 16px; }
-      .arch-num { width: 30px; height: 30px; font-size: 0.85rem; }
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+      }
 
-      .preview-body { padding: 16px; gap: 14px; }
-      .preview-metrics { grid-template-columns: 1fr; gap: 10px; }
-      .preview-table { min-width: 480px; }
+      .btn-primary,
+      .btn-secondary {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+        font-size: 0.95rem;
+      }
 
-      footer { margin-top: 60px; padding: 40px 0 30px; }
-      .footer-links { flex-wrap: wrap; gap: 16px; }
+      .quick-install {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        text-align: left;
+        padding: 12px;
+      }
 
-      #back-to-top { bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 1rem; }
+      .quick-install-code {
+        font-size: 0.75rem;
+      }
+
+      .quick-install .copy-btn {
+        align-self: flex-end;
+      }
+
+      .badges {
+        gap: 6px;
+        margin-bottom: 18px;
+      }
+
+      .badge {
+        font-size: 0.72rem;
+        padding: 4px 10px;
+      }
+
+      .terminal-box {
+        margin-top: 30px;
+      }
+
+      .terminal-body {
+        font-size: 0.78rem;
+        padding: 14px;
+        overflow-x: auto;
+        line-height: 1.6;
+      }
+
+      .section-title {
+        font-size: 1.85rem;
+        letter-spacing: -0.6px;
+      }
+
+      .section-desc {
+        font-size: 0.95rem;
+      }
+
+      section {
+        padding: 55px 0;
+      }
+
+      .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 12px;
+      }
+
+      table {
+        min-width: 580px;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        font-size: 0.85rem;
+      }
+
+      .grid-3 {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .card {
+        padding: 22px 18px;
+      }
+
+      .mode-card {
+        padding: 24px 18px;
+      }
+
+      .code-block {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .code-block code {
+        font-size: 0.75rem;
+        overflow-x: auto;
+      }
+
+      .code-block .copy-btn {
+        align-self: flex-end;
+      }
+
+      .faq-summary {
+        font-size: 0.95rem;
+        padding: 16px 18px;
+      }
+
+      .faq-answer {
+        font-size: 0.88rem;
+        padding: 0 18px 16px;
+      }
+
+      .arch-item {
+        flex-direction: column;
+        gap: 10px;
+        padding: 16px;
+      }
+
+      .arch-num {
+        width: 30px;
+        height: 30px;
+        font-size: 0.85rem;
+      }
+
+      .preview-body {
+        padding: 16px;
+        gap: 14px;
+      }
+
+      .preview-metrics {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .preview-table {
+        min-width: 480px;
+      }
+
+      footer {
+        margin-top: 60px;
+        padding: 40px 0 30px;
+      }
+
+      .footer-links {
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      #back-to-top {
+        bottom: 16px;
+        right: 16px;
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+      }
     }
 
     @media (max-width: 480px) {
-      .container { padding: 0 16px; }
-      .hero h1 { font-size: 1.8rem; }
-      .brand span { display: none; }
-      .lang-btn { padding: 4px 8px; font-size: 0.75rem; }
+      .container {
+        padding: 0 16px;
+      }
+
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+
+      .brand span {
+        display: none;
+      }
+
+      .lang-btn {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+      }
     }
   </style>
 </head>
+
 <body class="lang-en">
 
   <!-- Top Reading Scroll Progress Bar -->
@@ -1039,9 +1264,12 @@
         <li><a href="#comparison"><span class="lang-en">Comparison</span><span class="lang-it">Confronto</span></a></li>
         <li><a href="#modes"><span class="lang-en">Modes</span><span class="lang-it">Modalità</span></a></li>
         <li><a href="#telemetry"><span class="lang-en">Telemetry</span><span class="lang-it">Telemetria</span></a></li>
-        <li><a href="#features"><span class="lang-en">Diagnostics</span><span class="lang-it">Diagnostica</span></a></li>
-        <li><a href="#quickstart"><span class="lang-en">Quickstart</span><span class="lang-it">Guida Rapida</span></a></li>
-        <li><a href="#architecture"><span class="lang-en">Architecture</span><span class="lang-it">Architettura</span></a></li>
+        <li><a href="#features"><span class="lang-en">Diagnostics</span><span class="lang-it">Diagnostica</span></a>
+        </li>
+        <li><a href="#quickstart"><span class="lang-en">Quickstart</span><span class="lang-it">Guida Rapida</span></a>
+        </li>
+        <li><a href="#architecture"><span class="lang-en">Architecture</span><span
+              class="lang-it">Architettura</span></a></li>
         <li><a href="#faq">FAQ</a></li>
       </ul>
       <div class="nav-actions">
@@ -1050,9 +1278,11 @@
           <span class="lang-btn active" id="btn-en">EN</span>
           <span class="lang-btn" id="btn-it">IT</span>
         </div>
-        <a href="https://github.com/Gabry022003/vortex-mem" target="_blank" class="btn-github" title="Star vortex-mem on GitHub">
+        <a href="https://github.com/Gabry022003/vortex-mem" target="_blank" class="btn-github"
+          title="Star vortex-mem on GitHub">
           <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            <path
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
           </svg>
           <span class="star-badge">⭐ Star</span>
         </a>
@@ -1071,16 +1301,22 @@
       </div>
 
       <h1>
-        <span class="lang-en">Real-Time Memory Profiling & Corruption Detection for <span class="text-gradient">C and C++</span></span>
-        <span class="lang-it">Profilazione di Memoria e Rilevamento Corruzioni in Tempo Reale per <span class="text-gradient">C e C++</span></span>
+        <span class="lang-en">Real-Time Memory Profiling & Corruption Detection for <span class="text-gradient">C and
+            C++</span></span>
+        <span class="lang-it">Profilazione di Memoria e Rilevamento Corruzioni in Tempo Reale per <span
+            class="text-gradient">C e C++</span></span>
       </h1>
 
       <p class="hero-p">
         <span class="lang-en">
-          Vortex intercepts memory operations via dynamic linkage and streams granular live telemetry to an interactive web dashboard. Zero recompilation, zero heap interference, and instant detection of leaks, buffer overflows, and use-after-free.
+          Vortex intercepts memory operations via dynamic linkage and streams granular live telemetry to an interactive
+          web dashboard. Zero recompilation, zero heap interference, and instant detection of leaks, buffer overflows,
+          and use-after-free.
         </span>
         <span class="lang-it">
-          Vortex intercetta le operazioni di memoria a basso livello e trasmette telemetria in tempo reale su una dashboard web interattiva. Nessuna ricompilazione richiesta, zero interferenze sull'heap e rilevamento istantaneo di leak, buffer overflow e use-after-free.
+          Vortex intercetta le operazioni di memoria a basso livello e trasmette telemetria in tempo reale su una
+          dashboard web interattiva. Nessuna ricompilazione richiesta, zero interferenze sull'heap e rilevamento
+          istantaneo di leak, buffer overflow e use-after-free.
         </span>
       </p>
 
@@ -1101,7 +1337,8 @@
           <span class="prompt-sym">$</span>
           <code>git clone https://github.com/Gabry022003/vortex-mem.git && cd vortex-mem && make</code>
         </div>
-        <button class="copy-btn" onclick="copyText(this, 'git clone https://github.com/Gabry022003/vortex-mem.git && cd vortex-mem && make')">
+        <button class="copy-btn"
+          onclick="copyText(this, 'git clone https://github.com/Gabry022003/vortex-mem.git && cd vortex-mem && make')">
           <span class="lang-en">Copy</span><span class="lang-it">Copia</span>
         </button>
       </div>
@@ -1132,14 +1369,17 @@
   <section id="comparison">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag"><span class="lang-en">Comparison Matrix</span><span class="lang-it">Matrice di Confronto</span></span>
+        <span class="section-tag"><span class="lang-en">Comparison Matrix</span><span class="lang-it">Matrice di
+            Confronto</span></span>
         <h2 class="section-title">
           <span class="lang-en">Engineered Beyond Conventional Approaches</span>
           <span class="lang-it">Progettato Oltre gli Approcci Convenzionali</span>
         </h2>
         <p class="section-desc">
-          <span class="lang-en">See how Vortex compares against traditional post-mortem profilers and compiler-bound sanitizers.</span>
-          <span class="lang-it">Scopri come si confronta Vortex rispetto ai profiler tradizionali post-mortem e agli strumenti basati su ricompilazione.</span>
+          <span class="lang-en">See how Vortex compares against traditional post-mortem profilers and compiler-bound
+            sanitizers.</span>
+          <span class="lang-it">Scopri come si confronta Vortex rispetto ai profiler tradizionali post-mortem e agli
+            strumenti basati su ricompilazione.</span>
         </p>
       </div>
 
@@ -1148,47 +1388,73 @@
           <thead>
             <tr>
               <th><span class="lang-en">Key Capability</span><span class="lang-it">Caratteristica Chiave</span></th>
-              <th><span class="lang-en">Traditional Profilers</span><span class="lang-it">Profiler Tradizionali</span></th>
-              <th><span class="lang-en">Compiler-Bound Sanitizers</span><span class="lang-it">Strumenti con Ricompilazione</span></th>
+              <th><span class="lang-en">Traditional Profilers</span><span class="lang-it">Profiler Tradizionali</span>
+              </th>
+              <th><span class="lang-en">Compiler-Bound Sanitizers</span><span class="lang-it">Strumenti con
+                  Ricompilazione</span></th>
               <th class="highlight-col">Vortex Profiler</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong><span class="lang-en">Runtime Overhead</span><span class="lang-it">Overhead di Esecuzione</span></strong></td>
-              <td><span class="status-badge status-bad"><span class="lang-en">Severe (20x - 50x slowdown)</span><span class="lang-it">Severo (20x - 50x rallentamento)</span></span></td>
-              <td><span class="status-badge status-neutral"><span class="lang-en">Moderate (~2x slowdown)</span><span class="lang-it">Moderato (~2x rallentamento)</span></span></td>
-              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Near-Native (2M+ ops/sec)</span><span class="lang-it">Quasi-Nativo (2M+ ops/sec)</span></span></td>
+              <td><strong><span class="lang-en">Runtime Overhead</span><span class="lang-it">Overhead di
+                    Esecuzione</span></strong></td>
+              <td><span class="status-badge status-bad"><span class="lang-en">Severe (20x - 50x slowdown)</span><span
+                    class="lang-it">Severo (20x - 50x rallentamento)</span></span></td>
+              <td><span class="status-badge status-neutral"><span class="lang-en">Moderate (~2x slowdown)</span><span
+                    class="lang-it">Moderato (~2x rallentamento)</span></span></td>
+              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Near-Native (2M+
+                    ops/sec)</span><span class="lang-it">Quasi-Nativo (2M+ ops/sec)</span></span></td>
             </tr>
             <tr>
-              <td><strong><span class="lang-en">Source Code Requirement</span><span class="lang-it">Requisito Codice Sorgente</span></strong></td>
-              <td><span class="status-badge status-good"><span class="lang-en">No recompilation needed</span><span class="lang-it">Nessuna ricompilazione</span></span></td>
-              <td><span class="status-badge status-bad"><span class="lang-en">Mandatory Recompilation</span><span class="lang-it">Ricompilazione Obbligatoria</span></span></td>
-              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Zero Recompilation (LD_PRELOAD)</span><span class="lang-it">Nessuna Ricompilazione</span></span></td>
+              <td><strong><span class="lang-en">Source Code Requirement</span><span class="lang-it">Requisito Codice
+                    Sorgente</span></strong></td>
+              <td><span class="status-badge status-good"><span class="lang-en">No recompilation needed</span><span
+                    class="lang-it">Nessuna ricompilazione</span></span></td>
+              <td><span class="status-badge status-bad"><span class="lang-en">Mandatory Recompilation</span><span
+                    class="lang-it">Ricompilazione Obbligatoria</span></span></td>
+              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Zero Recompilation
+                    (LD_PRELOAD)</span><span class="lang-it">Nessuna Ricompilazione</span></span></td>
             </tr>
             <tr>
-              <td><strong><span class="lang-en">Observability Model</span><span class="lang-it">Modello di Osservabilità</span></strong></td>
-              <td><span class="status-badge status-neutral"><span class="lang-en">Post-Mortem Text Log</span><span class="lang-it">Log Testuale a Fine Programma</span></span></td>
-              <td><span class="status-badge status-neutral"><span class="lang-en">Crash-Time Terminal Dump</span><span class="lang-it">Dump a Terminale al Crash</span></span></td>
-              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Live Real-Time Web Dashboard</span><span class="lang-it">Dashboard Web Live in Tempo Reale</span></span></td>
+              <td><strong><span class="lang-en">Observability Model</span><span class="lang-it">Modello di
+                    Osservabilità</span></strong></td>
+              <td><span class="status-badge status-neutral"><span class="lang-en">Post-Mortem Text Log</span><span
+                    class="lang-it">Log Testuale a Fine Programma</span></span></td>
+              <td><span class="status-badge status-neutral"><span class="lang-en">Crash-Time Terminal Dump</span><span
+                    class="lang-it">Dump a Terminale al Crash</span></span></td>
+              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Live Real-Time Web
+                    Dashboard</span><span class="lang-it">Dashboard Web Live in Tempo Reale</span></span></td>
             </tr>
             <tr>
-              <td><strong><span class="lang-en">Closed-Source & 3rd Party Libs</span><span class="lang-it">Binari Closed-Source & Terze Parti</span></strong></td>
-              <td><span class="status-badge status-good"><span class="lang-en">Supported</span><span class="lang-it">Supportato</span></span></td>
-              <td><span class="status-badge status-bad"><span class="lang-en">Not Supported</span><span class="lang-it">Non Supportato</span></span></td>
-              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Fully Supported</span><span class="lang-it">Completamente Supportato</span></span></td>
+              <td><strong><span class="lang-en">Closed-Source & 3rd Party Libs</span><span class="lang-it">Binari
+                    Closed-Source & Terze Parti</span></strong></td>
+              <td><span class="status-badge status-good"><span class="lang-en">Supported</span><span
+                    class="lang-it">Supportato</span></span></td>
+              <td><span class="status-badge status-bad"><span class="lang-en">Not Supported</span><span
+                    class="lang-it">Non Supportato</span></span></td>
+              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Fully
+                    Supported</span><span class="lang-it">Completamente Supportato</span></span></td>
             </tr>
             <tr>
-              <td><strong><span class="lang-en">Corruption Detection</span><span class="lang-it">Rilevamento Corruzioni</span></strong></td>
-              <td><span class="status-badge status-good"><span class="lang-en">Yes (Heavy latency)</span><span class="lang-it">Sì (Molto lento)</span></span></td>
-              <td><span class="status-badge status-good"><span class="lang-en">Yes</span><span class="lang-it">Sì</span></span></td>
-              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Yes (Redzones & Quarantine)</span><span class="lang-it">Sì (Canarini & Quarantena)</span></span></td>
+              <td><strong><span class="lang-en">Corruption Detection</span><span class="lang-it">Rilevamento
+                    Corruzioni</span></strong></td>
+              <td><span class="status-badge status-good"><span class="lang-en">Yes (Heavy latency)</span><span
+                    class="lang-it">Sì (Molto lento)</span></span></td>
+              <td><span class="status-badge status-good"><span class="lang-en">Yes</span><span
+                    class="lang-it">Sì</span></span></td>
+              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Yes (Redzones &
+                    Quarantine)</span><span class="lang-it">Sì (Canarini & Quarantena)</span></span></td>
             </tr>
             <tr>
-              <td><strong><span class="lang-en">Optimization Heuristics</span><span class="lang-it">Consigli di Ottimizzazione</span></strong></td>
-              <td><span class="status-badge status-bad"><span class="lang-en">None</span><span class="lang-it">Nessuno</span></span></td>
-              <td><span class="status-badge status-bad"><span class="lang-en">None</span><span class="lang-it">Nessuno</span></span></td>
-              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Integrated Diagnostic Engine</span><span class="lang-it">Motore Diagnostico Integrato</span></span></td>
+              <td><strong><span class="lang-en">Optimization Heuristics</span><span class="lang-it">Consigli di
+                    Ottimizzazione</span></strong></td>
+              <td><span class="status-badge status-bad"><span class="lang-en">None</span><span
+                    class="lang-it">Nessuno</span></span></td>
+              <td><span class="status-badge status-bad"><span class="lang-en">None</span><span
+                    class="lang-it">Nessuno</span></span></td>
+              <td class="highlight-col"><span class="status-badge status-good"><span class="lang-en">Integrated
+                    Diagnostic Engine</span><span class="lang-it">Motore Diagnostico Integrato</span></span></td>
             </tr>
           </tbody>
         </table>
@@ -1200,61 +1466,82 @@
   <section id="modes" style="background: rgba(255,255,255,0.01);">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag"><span class="lang-en">Dual Operation Architecture</span><span class="lang-it">Architettura a Due Modalità</span></span>
+        <span class="section-tag"><span class="lang-en">Dual Operation Architecture</span><span
+            class="lang-it">Architettura a Due Modalità</span></span>
         <h2 class="section-title">
           <span class="lang-en">Tailored for Every Development Stage</span>
           <span class="lang-it">Adatto a Ogni Fase di Sviluppo</span>
         </h2>
         <p class="section-desc">
-          <span class="lang-en">Choose between ultra-fast performance profiling or deep memory corruption auditing.</span>
-          <span class="lang-it">Scegli tra profilazione ultra-veloce delle prestazioni o analisi profonda di sicurezza della memoria.</span>
+          <span class="lang-en">Choose between ultra-fast performance profiling or deep memory corruption
+            auditing.</span>
+          <span class="lang-it">Scegli tra profilazione ultra-veloce delle prestazioni o analisi profonda di sicurezza
+            della memoria.</span>
         </p>
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 32px;">
         <!-- Performance Mode -->
         <div class="mode-card">
-          <span class="mode-badge mode-perf"><span class="lang-en">Default Mode</span><span class="lang-it">Modalità Predefinita</span></span>
+          <span class="mode-badge mode-perf"><span class="lang-en">Default Mode</span><span class="lang-it">Modalità
+              Predefinita</span></span>
           <h3><span class="lang-en">⚡ Performance Mode</span><span class="lang-it">⚡ Modalità Performance</span></h3>
           <p style="color: var(--text-muted); margin: 12px 0 20px;">
             <span class="lang-en">
-              Engineered for throughput-critical benchmarks, production-like testbeds, and real-time interactive debugging. Delivers detailed call-site metrics and leak identification with virtually zero latency.
+              Engineered for throughput-critical benchmarks, production-like testbeds, and real-time interactive
+              debugging. Delivers detailed call-site metrics and leak identification with virtually zero latency.
             </span>
             <span class="lang-it">
-              Progettata per benchmark ad alte prestazioni, test realistici e debugging interattivo. Fornisce metriche dettagliate per call-site e identificazione dei leak con latenza quasi nulla.
+              Progettata per benchmark ad alte prestazioni, test realistici e debugging interattivo. Fornisce metriche
+              dettagliate per call-site e identificazione dei leak con latenza quasi nulla.
             </span>
           </p>
           <ul style="list-style: none; display: grid; gap: 10px; font-size: 0.95rem;">
-            <li>🔹 <span class="lang-en"><strong>Zero-Interference Tracking</strong> via striped hash maps</span><span class="lang-it"><strong>Tracciamento a zero interferenza</strong> via hash table a stripe</span></li>
-            <li>🔹 <span class="lang-en"><strong>Live UDP Telemetry</strong> streamed to the web dashboard</span><span class="lang-it"><strong>Telemetria UDP Live</strong> trasmessa alla dashboard</span></li>
-            <li>🔹 <span class="lang-en"><strong>Flame Graph & Timelines</strong> with instant visual feedback</span><span class="lang-it"><strong>Flame Graph & Timeline</strong> con feedback visivo immediato</span></li>
+            <li>🔹 <span class="lang-en"><strong>Zero-Interference Tracking</strong> via striped hash maps</span><span
+                class="lang-it"><strong>Tracciamento a zero interferenza</strong> via hash table a stripe</span></li>
+            <li>🔹 <span class="lang-en"><strong>Live UDP Telemetry</strong> streamed to the web dashboard</span><span
+                class="lang-it"><strong>Telemetria UDP Live</strong> trasmessa alla dashboard</span></li>
+            <li>🔹 <span class="lang-en"><strong>Flame Graph & Timelines</strong> with instant visual
+                feedback</span><span class="lang-it"><strong>Flame Graph & Timeline</strong> con feedback visivo
+                immediato</span></li>
           </ul>
           <div class="code-block">
             <code>./vortex run ./bin/my_app</code>
-            <button class="copy-btn" onclick="copyText(this, './vortex run ./bin/my_app')"><span class="lang-en">Copy</span><span class="lang-it">Copia</span></button>
+            <button class="copy-btn" onclick="copyText(this, './vortex run ./bin/my_app')"><span
+                class="lang-en">Copy</span><span class="lang-it">Copia</span></button>
           </div>
         </div>
 
         <!-- Heavy Mode -->
         <div class="mode-card">
-          <span class="mode-badge mode-heavy"><span class="lang-en">Safety & Corruption Audit</span><span class="lang-it">Sicurezza & Audit Corruzioni</span></span>
+          <span class="mode-badge mode-heavy"><span class="lang-en">Safety & Corruption Audit</span><span
+              class="lang-it">Sicurezza & Audit Corruzioni</span></span>
           <h3><span class="lang-en">🛡️ Heavy Mode</span><span class="lang-it">🛡️ Modalità Heavy</span></h3>
           <p style="color: var(--text-muted); margin: 12px 0 20px;">
             <span class="lang-en">
-              Activates canary guards and deferred deallocation queues to immediately detect memory corruptions before they manifest as silent vulnerabilities or sporadic crashes.
+              Activates canary guards and deferred deallocation queues to immediately detect memory corruptions before
+              they manifest as silent vulnerabilities or sporadic crashes.
             </span>
             <span class="lang-it">
-              Attiva canarini di guardia e code di disallocazione differite per scovare le corruzioni di memoria prima che diventino vulnerabilità silenti o crash sporadici.
+              Attiva canarini di guardia e code di disallocazione differite per scovare le corruzioni di memoria prima
+              che diventino vulnerabilità silenti o crash sporadici.
             </span>
           </p>
           <ul style="list-style: none; display: grid; gap: 10px; font-size: 0.95rem;">
-            <li>🛡️ <span class="lang-en"><strong>Canary Redzones</strong>: 16-byte signatures detect buffer overflows & underflows</span><span class="lang-it"><strong>Redzones (Canarini)</strong>: pattern da 16 byte per rilevare overflow e underflow</span></li>
-            <li>🛡️ <span class="lang-en"><strong>Poisoned Quarantine</strong>: Replaces deallocation with a poisoned FIFO queue to catch Use-After-Free</span><span class="lang-it"><strong>Quarantena Avvelenata</strong>: coda FIFO che avvelena la memoria libera per catturare gli Use-After-Free</span></li>
-            <li>🛡️ <span class="lang-en"><strong>Automatic Pinpointing</strong>: Source file and exact line numbers via addr2line</span><span class="lang-it"><strong>Individuazione Automatica</strong>: file sorgente e riga esatta con addr2line</span></li>
+            <li>🛡️ <span class="lang-en"><strong>Canary Redzones</strong>: 16-byte signatures detect buffer overflows &
+                underflows</span><span class="lang-it"><strong>Redzones (Canarini)</strong>: pattern da 16 byte per
+                rilevare overflow e underflow</span></li>
+            <li>🛡️ <span class="lang-en"><strong>Poisoned Quarantine</strong>: Replaces deallocation with a poisoned
+                FIFO queue to catch Use-After-Free</span><span class="lang-it"><strong>Quarantena Avvelenata</strong>:
+                coda FIFO che avvelena la memoria libera per catturare gli Use-After-Free</span></li>
+            <li>🛡️ <span class="lang-en"><strong>Automatic Pinpointing</strong>: Source file and exact line numbers via
+                addr2line</span><span class="lang-it"><strong>Individuazione Automatica</strong>: file sorgente e riga
+                esatta con addr2line</span></li>
           </ul>
           <div class="code-block">
             <code>./vortex run --heavy ./bin/my_app</code>
-            <button class="copy-btn" onclick="copyText(this, './vortex run --heavy ./bin/my_app')"><span class="lang-en">Copy</span><span class="lang-it">Copia</span></button>
+            <button class="copy-btn" onclick="copyText(this, './vortex run --heavy ./bin/my_app')"><span
+                class="lang-en">Copy</span><span class="lang-it">Copia</span></button>
           </div>
         </div>
       </div>
@@ -1265,14 +1552,17 @@
   <section id="telemetry" style="background: rgba(255, 255, 255, 0.012);">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag"><span class="lang-en">Telemetry Profile</span><span class="lang-it">Profilo di Telemetria</span></span>
+        <span class="section-tag"><span class="lang-en">Telemetry Profile</span><span class="lang-it">Profilo di
+            Telemetria</span></span>
         <h2 class="section-title">
           <span class="lang-en">Memory Allocation Trend (Timeline Profile)</span>
           <span class="lang-it">Andamento del Consumo di Memoria (Profilo Temporale)</span>
         </h2>
         <p class="section-desc">
-          <span class="lang-en">Illustrative curve of heap usage and peak allocation spikes tracked over execution time.</span>
-          <span class="lang-it">Curva d'esempio dell'uso della memoria heap e dei picchi di allocazione monitorati nel tempo di esecuzione.</span>
+          <span class="lang-en">Illustrative curve of heap usage and peak allocation spikes tracked over execution
+            time.</span>
+          <span class="lang-it">Curva d'esempio dell'uso della memoria heap e dei picchi di allocazione monitorati nel
+            tempo di esecuzione.</span>
         </p>
       </div>
 
@@ -1287,7 +1577,8 @@
             <span class="preview-title">http://localhost:8000 — Vortex Observability Suite</span>
           </div>
           <div class="preview-status">
-            <span style="width:7px; height:7px; border-radius:50%; background:var(--primary); box-shadow:0 0 6px var(--primary-glow);"></span>
+            <span
+              style="width:7px; height:7px; border-radius:50%; background:var(--primary); box-shadow:0 0 6px var(--primary-glow);"></span>
             <span class="lang-en">TIMELINE TELEMETRY PROFILE</span>
             <span class="lang-it">PROFILO TEMPORALE TELEMETRIA</span>
           </div>
@@ -1297,22 +1588,26 @@
           <!-- 4 Metric Cards -->
           <div class="preview-metrics">
             <div class="pm-card">
-              <div class="pm-label"><span class="lang-en">Live Heap Memory</span><span class="lang-it">Memoria Heap Live</span></div>
+              <div class="pm-label"><span class="lang-en">Live Heap Memory</span><span class="lang-it">Memoria Heap
+                  Live</span></div>
               <div class="pm-val">14.82 MB</div>
               <div class="pm-sub">+0.24 MB/s sampling</div>
             </div>
             <div class="pm-card">
-              <div class="pm-label"><span class="lang-en">Active Allocations</span><span class="lang-it">Allocazioni Attive</span></div>
+              <div class="pm-label"><span class="lang-en">Active Allocations</span><span class="lang-it">Allocazioni
+                  Attive</span></div>
               <div class="pm-val">28,412</div>
               <div class="pm-sub">0 Leaks Detected</div>
             </div>
             <div class="pm-card">
-              <div class="pm-label"><span class="lang-en">Peak Heap Footprint</span><span class="lang-it">Picco Massimo Heap</span></div>
+              <div class="pm-label"><span class="lang-en">Peak Heap Footprint</span><span class="lang-it">Picco Massimo
+                  Heap</span></div>
               <div class="pm-val">32.10 MB</div>
               <div class="pm-sub">Recorded at T+0.84s</div>
             </div>
             <div class="pm-card">
-              <div class="pm-label"><span class="lang-en">Profiling Throughput</span><span class="lang-it">Throughput Profiler</span></div>
+              <div class="pm-label"><span class="lang-en">Profiling Throughput</span><span class="lang-it">Throughput
+                  Profiler</span></div>
               <div class="pm-val">2.05M <span style="font-size:0.85rem; color:var(--primary);">ops/s</span></div>
               <div class="pm-sub">64 Cache Stripes</div>
             </div>
@@ -1334,8 +1629,10 @@
               <line x1="0" y1="30" x2="800" y2="30" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4" />
               <line x1="0" y1="65" x2="800" y2="65" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4" />
               <line x1="0" y1="95" x2="800" y2="95" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4" />
-              <path d="M0,90 Q80,85 140,70 T260,55 T380,68 T500,40 T620,48 T720,35 T800,32 L800,120 L0,120 Z" fill="url(#chartGrad)" />
-              <path d="M0,90 Q80,85 140,70 T260,55 T380,68 T500,40 T620,48 T720,35 T800,32" fill="none" stroke="#00d2ff" stroke-width="2.5" />
+              <path d="M0,90 Q80,85 140,70 T260,55 T380,68 T500,40 T620,48 T720,35 T800,32 L800,120 L0,120 Z"
+                fill="url(#chartGrad)" />
+              <path d="M0,90 Q80,85 140,70 T260,55 T380,68 T500,40 T620,48 T720,35 T800,32" fill="none" stroke="#00d2ff"
+                stroke-width="2.5" />
               <circle cx="800" cy="32" r="4" fill="#00d2ff" />
             </svg>
           </div>
@@ -1345,7 +1642,8 @@
             <table class="preview-table">
               <thead>
                 <tr>
-                  <th><span class="lang-en">Resolved Call-Site</span><span class="lang-it">Punto di Chiamata Risolto</span></th>
+                  <th><span class="lang-en">Resolved Call-Site</span><span class="lang-it">Punto di Chiamata
+                      Risolto</span></th>
                   <th><span class="lang-en">API Function</span><span class="lang-it">Funzione API</span></th>
                   <th><span class="lang-en">Total Calls</span><span class="lang-it">Chiamate Totali</span></th>
                   <th><span class="lang-en">Avg Size</span><span class="lang-it">Dimensione Media</span></th>
@@ -1390,51 +1688,66 @@
   <section id="features">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag"><span class="lang-en">Built-In Intelligence</span><span class="lang-it">Intelligenza Integrata</span></span>
+        <span class="section-tag"><span class="lang-en">Built-In Intelligence</span><span class="lang-it">Intelligenza
+            Integrata</span></span>
         <h2 class="section-title">
           <span class="lang-en">Automated Diagnostic Suggestions</span>
           <span class="lang-it">Diagnostica e Suggerimenti Automatici</span>
         </h2>
         <p class="section-desc">
-          <span class="lang-en">Vortex doesn't just list addresses; its analysis engine automatically categorizes behavioral memory patterns and suggests targeted architectural fixes.</span>
-          <span class="lang-it">Vortex non si limita a elencare indirizzi; il suo motore analitico identifica pattern di memoria anomali e suggerisce fix architetturali precisi.</span>
+          <span class="lang-en">Vortex doesn't just list addresses; its analysis engine automatically categorizes
+            behavioral memory patterns and suggests targeted architectural fixes.</span>
+          <span class="lang-it">Vortex non si limita a elencare indirizzi; il suo motore analitico identifica pattern di
+            memoria anomali e suggerisce fix architetturali precisi.</span>
         </p>
       </div>
 
       <div class="grid-3">
         <div class="card">
           <div class="card-icon">🔁</div>
-          <h3><span class="lang-en">Loop Leak Detector</span><span class="lang-it">Rilevatore di Leak in Loop</span></h3>
+          <h3><span class="lang-en">Loop Leak Detector</span><span class="lang-it">Rilevatore di Leak in Loop</span>
+          </h3>
           <p>
-            <span class="lang-en">Identifies allocations repeated within loops or iterative tasks that fail to deallocate before the next cycle, pinpointing uncollected batches.</span>
-            <span class="lang-it">Identifica allocazioni ripetute dentro cicli o task iterativi che non vengono deallocate prima del ciclo successivo, segnalando accumuli anomali.</span>
+            <span class="lang-en">Identifies allocations repeated within loops or iterative tasks that fail to
+              deallocate before the next cycle, pinpointing uncollected batches.</span>
+            <span class="lang-it">Identifica allocazioni ripetute dentro cicli o task iterativi che non vengono
+              deallocate prima del ciclo successivo, segnalando accumuli anomali.</span>
           </p>
         </div>
 
         <div class="card">
           <div class="card-icon">📈</div>
-          <h3><span class="lang-en">Growing Containers</span><span class="lang-it">Contenitori in Crescita Illimitata</span></h3>
+          <h3><span class="lang-en">Growing Containers</span><span class="lang-it">Contenitori in Crescita
+              Illimitata</span></h3>
           <p>
-            <span class="lang-en">Detects collections, buffers, or queues whose allocation frequency steadily increases over time without draining or bounded caps.</span>
-            <span class="lang-it">Rileva collezioni, buffer o code la cui frequenza di allocazione cresce continuamente senza svuotamento o limiti prestabiliti.</span>
+            <span class="lang-en">Detects collections, buffers, or queues whose allocation frequency steadily increases
+              over time without draining or bounded caps.</span>
+            <span class="lang-it">Rileva collezioni, buffer o code la cui frequenza di allocazione cresce continuamente
+              senza svuotamento o limiti prestabiliti.</span>
           </p>
         </div>
 
         <div class="card">
           <div class="card-icon">🧱</div>
-          <h3><span class="lang-en">Stack Buffer Candidates</span><span class="lang-it">Candidati per lo Stack</span></h3>
+          <h3><span class="lang-en">Stack Buffer Candidates</span><span class="lang-it">Candidati per lo Stack</span>
+          </h3>
           <p>
-            <span class="lang-en">Suggests replacing heap allocations with stack buffers (or Small Buffer Optimization) for temporary allocations with average lifetimes &lt;5ms.</span>
-            <span class="lang-it">Suggerisce di sostituire l'heap con buffer sullo stack (o Small Buffer Optimization) per blocchi temporanei con vita media inferiore a 5ms.</span>
+            <span class="lang-en">Suggests replacing heap allocations with stack buffers (or Small Buffer Optimization)
+              for temporary allocations with average lifetimes &lt;5ms.</span>
+            <span class="lang-it">Suggerisce di sostituire l'heap con buffer sullo stack (o Small Buffer Optimization)
+              per blocchi temporanei con vita media inferiore a 5ms.</span>
           </p>
         </div>
 
         <div class="card">
           <div class="card-icon">🏊</div>
-          <h3><span class="lang-en">Memory Pool Candidates</span><span class="lang-it">Candidati per Memory Pool</span></h3>
+          <h3><span class="lang-en">Memory Pool Candidates</span><span class="lang-it">Candidati per Memory Pool</span>
+          </h3>
           <p>
-            <span class="lang-en">Flags call-sites generating hundreds of identically-sized buffers, advising slab or pool allocation to cut malloc overhead by up to 90%.</span>
-            <span class="lang-it">Segnala call-site che generano centinaia di buffer della stessa identica dimensione, consigliando un allocatore a slab/pool per tagliare l'overhead fino al 90%.</span>
+            <span class="lang-en">Flags call-sites generating hundreds of identically-sized buffers, advising slab or
+              pool allocation to cut malloc overhead by up to 90%.</span>
+            <span class="lang-it">Segnala call-site che generano centinaia di buffer della stessa identica dimensione,
+              consigliando un allocatore a slab/pool per tagliare l'overhead fino al 90%.</span>
           </p>
         </div>
 
@@ -1442,17 +1755,22 @@
           <div class="card-icon">⚡</div>
           <h3><span class="lang-en">High Churn Analysis</span><span class="lang-it">Analisi di Alto Churn</span></h3>
           <p>
-            <span class="lang-en">Pinpoints excessive allocate/free churn in hot inner loops, recommending buffer reuse or thread-local free lists.</span>
-            <span class="lang-it">Individua frequenze eccessive di allocazione/deallocazione rapida nei loop critici, suggerendo il riutilizzo dei buffer.</span>
+            <span class="lang-en">Pinpoints excessive allocate/free churn in hot inner loops, recommending buffer reuse
+              or thread-local free lists.</span>
+            <span class="lang-it">Individua frequenze eccessive di allocazione/deallocazione rapida nei loop critici,
+              suggerendo il riutilizzo dei buffer.</span>
           </p>
         </div>
 
         <div class="card">
           <div class="card-icon">🔥</div>
-          <h3><span class="lang-en">Interactive Flame Graphs</span><span class="lang-it">Flame Graph Interattivi</span></h3>
+          <h3><span class="lang-en">Interactive Flame Graphs</span><span class="lang-it">Flame Graph Interattivi</span>
+          </h3>
           <p>
-            <span class="lang-en">Hierarchically aggregates call-stack trees directly in the web UI, letting you zoom into high-consumption functions with a click.</span>
-            <span class="lang-it">Aggrega gerarchicamente l'albero delle chiamate nella UI web, permettendo di zoomare con un click sulle funzioni che consumano più RAM.</span>
+            <span class="lang-en">Hierarchically aggregates call-stack trees directly in the web UI, letting you zoom
+              into high-consumption functions with a click.</span>
+            <span class="lang-it">Aggrega gerarchicamente l'albero delle chiamate nella UI web, permettendo di zoomare
+              con un click sulle funzioni che consumano più RAM.</span>
           </p>
         </div>
       </div>
@@ -1463,13 +1781,15 @@
   <section id="quickstart">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag"><span class="lang-en">Quickstart Guide</span><span class="lang-it">Guida Rapida</span></span>
+        <span class="section-tag"><span class="lang-en">Quickstart Guide</span><span class="lang-it">Guida
+            Rapida</span></span>
         <h2 class="section-title">
           <span class="lang-en">Up and Running in 30 Seconds</span>
           <span class="lang-it">Operativo in 30 Secondi</span>
         </h2>
         <p class="section-desc">
-          <span class="lang-en">Works out of the box on Linux distributions and Windows Subsystem for Linux (WSL).</span>
+          <span class="lang-en">Works out of the box on Linux distributions and Windows Subsystem for Linux
+            (WSL).</span>
           <span class="lang-it">Funziona direttamente su distribuzioni Linux e Windows Subsystem for Linux (WSL).</span>
         </p>
       </div>
@@ -1483,7 +1803,9 @@
           </h4>
           <div class="code-block">
             <code>git clone https://github.com/Gabry022003/vortex-mem.git && cd vortex-mem && make</code>
-            <button class="copy-btn" onclick="copyText(this, 'git clone https://github.com/Gabry022003/vortex-mem.git && cd vortex-mem && make')"><span class="lang-en">Copy</span><span class="lang-it">Copia</span></button>
+            <button class="copy-btn"
+              onclick="copyText(this, 'git clone https://github.com/Gabry022003/vortex-mem.git && cd vortex-mem && make')"><span
+                class="lang-en">Copy</span><span class="lang-it">Copia</span></button>
           </div>
         </div>
 
@@ -1495,10 +1817,12 @@
           </h4>
           <div class="code-block">
             <code>./vortex run ./bin/your_executable</code>
-            <button class="copy-btn" onclick="copyText(this, './vortex run ./bin/your_executable')"><span class="lang-en">Copy</span><span class="lang-it">Copia</span></button>
+            <button class="copy-btn" onclick="copyText(this, './vortex run ./bin/your_executable')"><span
+                class="lang-en">Copy</span><span class="lang-it">Copia</span></button>
           </div>
           <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">
-            <span class="lang-en">Automatically spins up the C-Server and opens http://localhost:8000 in your browser.</span>
+            <span class="lang-en">Automatically spins up the C-Server and opens http://localhost:8000 in your
+              browser.</span>
             <span class="lang-it">Avvia automaticamente il C-Server e apre http://localhost:8000 nel browser.</span>
           </p>
         </div>
@@ -1511,11 +1835,14 @@
           </h4>
           <div class="code-block">
             <code>./vortex run --ci ./bin/your_executable</code>
-            <button class="copy-btn" onclick="copyText(this, './vortex run --ci ./bin/your_executable')"><span class="lang-en">Copy</span><span class="lang-it">Copia</span></button>
+            <button class="copy-btn" onclick="copyText(this, './vortex run --ci ./bin/your_executable')"><span
+                class="lang-en">Copy</span><span class="lang-it">Copia</span></button>
           </div>
           <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">
-            <span class="lang-en">Executes silently without opening a browser and writes structured metrics to vortex_report.json.</span>
-            <span class="lang-it">Esegue in silenzio senza aprire il browser e genera il file strutturato vortex_report.json.</span>
+            <span class="lang-en">Executes silently without opening a browser and writes structured metrics to
+              vortex_report.json.</span>
+            <span class="lang-it">Esegue in silenzio senza aprire il browser e genera il file strutturato
+              vortex_report.json.</span>
           </p>
         </div>
       </div>
@@ -1526,14 +1853,17 @@
   <section id="architecture" style="background: rgba(255,255,255,0.01);">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag"><span class="lang-en">System Engineering</span><span class="lang-it">Ingegneria di Sistema</span></span>
+        <span class="section-tag"><span class="lang-en">System Engineering</span><span class="lang-it">Ingegneria di
+            Sistema</span></span>
         <h2 class="section-title">
           <span class="lang-en">Low-Level Technical Architecture</span>
           <span class="lang-it">Architettura Tecnica di Basso Livello</span>
         </h2>
         <p class="section-desc">
-          <span class="lang-en">Designed around a strict zero-interference philosophy to ensure the profiler never disturbs the observed program.</span>
-          <span class="lang-it">Progettato con una filosofia a zero interferenza per garantire che il profiler non alteri il programma osservato.</span>
+          <span class="lang-en">Designed around a strict zero-interference philosophy to ensure the profiler never
+            disturbs the observed program.</span>
+          <span class="lang-it">Progettato con una filosofia a zero interferenza per garantire che il profiler non
+            alteri il programma osservato.</span>
         </p>
       </div>
 
@@ -1541,10 +1871,17 @@
         <div class="arch-item">
           <div class="arch-num">1</div>
           <div class="arch-content">
-            <h4><span class="lang-en">Zero-Interference Heap Management</span><span class="lang-it">Gestione Heap a Zero Interferenza</span></h4>
+            <h4><span class="lang-en">Zero-Interference Heap Management</span><span class="lang-it">Gestione Heap a Zero
+                Interferenza</span></h4>
             <p>
-              <span class="lang-en">Internal tracking hash tables are allocated directly via <code>mmap(MAP_PRIVATE | MAP_ANONYMOUS)</code>, while startup libc calls (like <code>dlsym</code> invoking <code>calloc</code>) are fulfilled by a static 4MB bump allocator. The application's heap remains pristine.</span>
-              <span class="lang-it">Le hash table interne vengono allocate con <code>mmap(MAP_PRIVATE | MAP_ANONYMOUS)</code>, mentre l'avvio della libc (come <code>dlsym</code> che invoca <code>calloc</code>) è gestito da un bump allocator statico da 4MB. L'heap dell'applicazione rimane incontaminato.</span>
+              <span class="lang-en">Internal tracking hash tables are allocated directly via
+                <code>mmap(MAP_PRIVATE | MAP_ANONYMOUS)</code>, while startup libc calls (like <code>dlsym</code>
+                invoking <code>calloc</code>) are fulfilled by a static 4MB bump allocator. The application's heap
+                remains pristine.</span>
+              <span class="lang-it">Le hash table interne vengono allocate con
+                <code>mmap(MAP_PRIVATE | MAP_ANONYMOUS)</code>, mentre l'avvio della libc (come <code>dlsym</code> che
+                invoca <code>calloc</code>) è gestito da un bump allocator statico da 4MB. L'heap dell'applicazione
+                rimane incontaminato.</span>
             </p>
           </div>
         </div>
@@ -1552,10 +1889,15 @@
         <div class="arch-item">
           <div class="arch-num">2</div>
           <div class="arch-content">
-            <h4><span class="lang-en">Striped Locking Architecture</span><span class="lang-it">Architettura a Striped Locking</span></h4>
+            <h4><span class="lang-en">Striped Locking Architecture</span><span class="lang-it">Architettura a Striped
+                Locking</span></h4>
             <p>
-              <span class="lang-en">Eliminates global mutex bottlenecks using 64 independent stripes aligned to CPU cache lines (64 bytes). Multiple concurrent threads allocate memory simultaneously without false sharing or contention spikes.</span>
-              <span class="lang-it">Elimina i colli di bottiglia del mutex globale con 64 stripe indipendenti allineate alle linee di cache della CPU (64 byte). Thread multipli allocano memoria in parallelo senza contesa o rallentamenti.</span>
+              <span class="lang-en">Eliminates global mutex bottlenecks using 64 independent stripes aligned to CPU
+                cache lines (64 bytes). Multiple concurrent threads allocate memory simultaneously without false sharing
+                or contention spikes.</span>
+              <span class="lang-it">Elimina i colli di bottiglia del mutex globale con 64 stripe indipendenti allineate
+                alle linee di cache della CPU (64 byte). Thread multipli allocano memoria in parallelo senza contesa o
+                rallentamenti.</span>
             </p>
           </div>
         </div>
@@ -1563,10 +1905,15 @@
         <div class="arch-item">
           <div class="arch-num">3</div>
           <div class="arch-content">
-            <h4><span class="lang-en">Asynchronous Signal Decoupling</span><span class="lang-it">Disaccoppiamento Asincrono dei Segnali</span></h4>
+            <h4><span class="lang-en">Asynchronous Signal Decoupling</span><span class="lang-it">Disaccoppiamento
+                Asincrono dei Segnali</span></h4>
             <p>
-              <span class="lang-en">Fatal crashes (SIGSEGV, SIGBUS) immediately abort to prevent recursive deadlocks, while termination signals write to a non-blocking pipe that triggers report serialization on a dedicated telemetry thread.</span>
-              <span class="lang-it">I crash fatali (SIGSEGV, SIGBUS) abortiscono immediatamente per evitare deadlock ricorsivi, mentre i segnali di terminazione scrivono su una pipe non-bloccante gestita dal thread di telemetria.</span>
+              <span class="lang-en">Fatal crashes (SIGSEGV, SIGBUS) immediately abort to prevent recursive deadlocks,
+                while termination signals write to a non-blocking pipe that triggers report serialization on a dedicated
+                telemetry thread.</span>
+              <span class="lang-it">I crash fatali (SIGSEGV, SIGBUS) abortiscono immediatamente per evitare deadlock
+                ricorsivi, mentre i segnali di terminazione scrivono su una pipe non-bloccante gestita dal thread di
+                telemetria.</span>
             </p>
           </div>
         </div>
@@ -1574,10 +1921,15 @@
         <div class="arch-item">
           <div class="arch-num">4</div>
           <div class="arch-content">
-            <h4><span class="lang-en">Multi-Process Fork Handling</span><span class="lang-it">Gestione Multi-Processo (fork)</span></h4>
+            <h4><span class="lang-en">Multi-Process Fork Handling</span><span class="lang-it">Gestione Multi-Processo
+                (fork)</span></h4>
             <p>
-              <span class="lang-en">Integrated <code>pthread_atfork</code> handlers suspend locks and state during <code>fork()</code>, safely resuming in both parent and child processes with dynamically isolated report targets.</span>
-              <span class="lang-it">Gli handler <code>pthread_atfork</code> sospendono lock e stato prima della <code>fork()</code>, riprendendo l'esecuzione in sicurezza nel genitore e nel figlio con file di report separati.</span>
+              <span class="lang-en">Integrated <code>pthread_atfork</code> handlers suspend locks and state during
+                <code>fork()</code>, safely resuming in both parent and child processes with dynamically isolated report
+                targets.</span>
+              <span class="lang-it">Gli handler <code>pthread_atfork</code> sospendono lock e stato prima della
+                <code>fork()</code>, riprendendo l'esecuzione in sicurezza nel genitore e nel figlio con file di report
+                separati.</span>
             </p>
           </div>
         </div>
@@ -1589,59 +1941,84 @@
   <section id="faq">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag"><span class="lang-en">Frequently Asked Questions</span><span class="lang-it">Domande Frequenti</span></span>
+        <span class="section-tag"><span class="lang-en">Frequently Asked Questions</span><span class="lang-it">Domande
+            Frequenti</span></span>
         <h2 class="section-title">
           <span class="lang-en">Technical FAQ</span>
           <span class="lang-it">FAQ Tecniche</span>
         </h2>
         <p class="section-desc">
-          <span class="lang-en">Common engineering questions regarding runtime semantics, security, and low-level mechanics.</span>
-          <span class="lang-it">Risposte immediate ai dubbi tecnici più comuni su sicurezza, semantica di runtime e meccaniche interne.</span>
+          <span class="lang-en">Common engineering questions regarding runtime semantics, security, and low-level
+            mechanics.</span>
+          <span class="lang-it">Risposte immediate ai dubbi tecnici più comuni su sicurezza, semantica di runtime e
+            meccaniche interne.</span>
         </p>
       </div>
 
       <div class="faq-list">
         <details class="faq-item" open>
           <summary class="faq-summary">
-            <span><span class="lang-en">Does Vortex require root or <code>sudo</code> privileges?</span><span class="lang-it">Vortex richiede privilegi di root o <code>sudo</code>?</span></span>
+            <span><span class="lang-en">Does Vortex require root or <code>sudo</code> privileges?</span><span
+                class="lang-it">Vortex richiede privilegi di root o <code>sudo</code>?</span></span>
             <span class="faq-icon">+</span>
           </summary>
           <div class="faq-answer">
-            <span class="lang-en">No. Vortex operates entirely within standard user-space via the POSIX dynamic linker (<code>LD_PRELOAD</code>). It requires zero elevated privileges and leaves your system configuration untouched.</span>
-            <span class="lang-it">No. Vortex opera interamente nello spazio utente tramite il dynamic linker POSIX (<code>LD_PRELOAD</code>). Non richiede privilegi speciali di sistema e non modifica la configurazione dell'OS.</span>
+            <span class="lang-en">No. Vortex operates entirely within standard user-space via the POSIX dynamic linker
+              (<code>LD_PRELOAD</code>). It requires zero elevated privileges and leaves your system configuration
+              untouched.</span>
+            <span class="lang-it">No. Vortex opera interamente nello spazio utente tramite il dynamic linker POSIX
+              (<code>LD_PRELOAD</code>). Non richiede privilegi speciali di sistema e non modifica la configurazione
+              dell'OS.</span>
           </div>
         </details>
 
         <details class="faq-item">
           <summary class="faq-summary">
-            <span><span class="lang-en">Does it support closed-source binaries and 3rd-party shared libraries?</span><span class="lang-it">Supporta binari closed-source e librerie di terze parti precompilate?</span></span>
+            <span><span class="lang-en">Does it support closed-source binaries and 3rd-party shared
+                libraries?</span><span class="lang-it">Supporta binari closed-source e librerie di terze parti
+                precompilate?</span></span>
             <span class="faq-icon">+</span>
           </summary>
           <div class="faq-answer">
-            <span class="lang-en">Yes. Because Vortex hooks dynamic allocation symbols at the libc boundary, any executable or dynamically linked third-party <code>.so</code> library is monitored seamlessly without needing the original source code.</span>
-            <span class="lang-it">Sì. Poiché Vortex intercetta le funzioni di allocazione sui confini della libc, qualsiasi eseguibile o libreria condivisa <code>.so</code> di terze parti viene tracciata nativamente senza bisogno del codice sorgente originale.</span>
+            <span class="lang-en">Yes. Because Vortex hooks dynamic allocation symbols at the libc boundary, any
+              executable or dynamically linked third-party <code>.so</code> library is monitored seamlessly without
+              needing the original source code.</span>
+            <span class="lang-it">Sì. Poiché Vortex intercetta le funzioni di allocazione sui confini della libc,
+              qualsiasi eseguibile o libreria condivisa <code>.so</code> di terze parti viene tracciata nativamente
+              senza bisogno del codice sorgente originale.</span>
           </div>
         </details>
 
         <details class="faq-item">
           <summary class="faq-summary">
-            <span><span class="lang-en">How does Vortex prevent lock contention in heavily multi-threaded programs?</span><span class="lang-it">Come evita la contesa dei lock nei programmi multi-thread intensivi?</span></span>
+            <span><span class="lang-en">How does Vortex prevent lock contention in heavily multi-threaded
+                programs?</span><span class="lang-it">Come evita la contesa dei lock nei programmi multi-thread
+                intensivi?</span></span>
             <span class="faq-icon">+</span>
           </summary>
           <div class="faq-answer">
-            <span class="lang-en">Vortex splits its internal pointer tracking into 64 distinct hash stripes, each protected by an independent, CPU cache-line aligned spinlock. Threads allocating concurrently hash to different stripes with virtually zero contention.</span>
-            <span class="lang-it">Vortex suddivide il tracciamento dei puntatori in 64 stripe hash indipendenti, ciascuna protetta da uno spinlock allineato alla cache CPU. I thread che allocano simultaneamente finiscono su stripe diverse con contesa praticamente nulla.</span>
+            <span class="lang-en">Vortex splits its internal pointer tracking into 64 distinct hash stripes, each
+              protected by an independent, CPU cache-line aligned spinlock. Threads allocating concurrently hash to
+              different stripes with virtually zero contention.</span>
+            <span class="lang-it">Vortex suddivide il tracciamento dei puntatori in 64 stripe hash indipendenti,
+              ciascuna protetta da uno spinlock allineato alla cache CPU. I thread che allocano simultaneamente
+              finiscono su stripe diverse con contesa praticamente nulla.</span>
           </div>
         </details>
 
         <details class="faq-item">
           <summary class="faq-summary">
-            <span><span class="lang-en">Can Vortex be integrated into CI/CD automated test pipelines?</span><span class="lang-it">Come si integra Vortex nelle pipeline CI/CD di testing automatico?</span></span>
+            <span><span class="lang-en">Can Vortex be integrated into CI/CD automated test pipelines?</span><span
+                class="lang-it">Come si integra Vortex nelle pipeline CI/CD di testing automatico?</span></span>
             <span class="faq-icon">+</span>
           </summary>
           <div class="faq-answer">
-            <span class="lang-en">Yes. Using <code>./vortex run --ci ./bin/app</code>, the web server is suppressed. Vortex runs the binary headlessly, emits a machine-readable <code>vortex_report.json</code>, and exits with code 1 if any leaks or corruptions are found.</span>
-            <span class="lang-it">Sì. Usando <code>./vortex run --ci ./bin/app</code>, il server web non viene avviato. Vortex esegue il test in modalità headless, genera il report JSON strutturato <code>vortex_report.json</code> e termina con codice di errore 1 se rileva anomalie.</span>
+            <span class="lang-en">Yes. Using <code>./vortex run --ci ./bin/app</code>, the web server is suppressed.
+              Vortex runs the binary headlessly, emits a machine-readable <code>vortex_report.json</code>, and exits
+              with code 1 if any leaks or corruptions are found.</span>
+            <span class="lang-it">Sì. Usando <code>./vortex run --ci ./bin/app</code>, il server web non viene avviato.
+              Vortex esegue il test in modalità headless, genera il report JSON strutturato
+              <code>vortex_report.json</code> e termina con codice di errore 1 se rileva anomalie.</span>
           </div>
         </details>
       </div>
@@ -1655,13 +2032,17 @@
         <li><a href="https://github.com/Gabry022003/vortex-mem" target="_blank">GitHub Repository</a></li>
         <li><a href="https://github.com/Gabry022003/vortex-mem/blob/main/LICENSE" target="_blank">MIT License</a></li>
         <li><a href="#telemetry"><span class="lang-en">Telemetry</span><span class="lang-it">Telemetria</span></a></li>
-        <li><a href="#quickstart"><span class="lang-en">Quickstart</span><span class="lang-it">Guida Rapida</span></a></li>
-        <li><a href="#architecture"><span class="lang-en">Architecture</span><span class="lang-it">Architettura</span></a></li>
+        <li><a href="#quickstart"><span class="lang-en">Quickstart</span><span class="lang-it">Guida Rapida</span></a>
+        </li>
+        <li><a href="#architecture"><span class="lang-en">Architecture</span><span
+              class="lang-it">Architettura</span></a></li>
         <li><a href="#faq">FAQ</a></li>
       </ul>
       <p class="footer-copy">
-        <span class="lang-en">Vortex Memory Profiler — Released under the MIT License. Free for personal, academic, and commercial use.</span>
-        <span class="lang-it">Vortex Memory Profiler — Rilasciato sotto Licenza MIT. Gratuito per uso personale, accademico e commerciale.</span>
+        <span class="lang-en">Vortex Memory Profiler — Released under the MIT License. Free for personal, academic, and
+          commercial use.</span>
+        <span class="lang-it">Vortex Memory Profiler — Rilasciato sotto Licenza MIT. Gratuito per uso personale,
+          accademico e commerciale.</span>
       </p>
     </div>
   </footer>
@@ -1778,7 +2159,8 @@
     });
   </script>
 
-  <!-- Floating Back to Top Button -->
-  <button id="back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="Back to top / Torna su" aria-label="Back to top">↑</button>
+  <button id="back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="Back to top / Torna su"
+    aria-label="Back to top">↑</button>
 </body>
+
 </html>
