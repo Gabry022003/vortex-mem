@@ -182,23 +182,45 @@
       box-shadow: 0 0 12px var(--primary-glow);
     }
 
+    /* Reading Scroll Progress Bar */
+    #scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary) 0%, #3a7bd5 50%, #9b51e0 100%);
+      box-shadow: 0 0 10px rgba(0, 210, 255, 0.8), 0 0 5px rgba(155, 81, 224, 0.5);
+      z-index: 100000;
+      transition: width 0.05s ease-out;
+      pointer-events: none;
+    }
+
     .btn-github {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 18px;
+      gap: 7px;
+      padding: 7px 16px;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.07);
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: #fff;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
       transition: all 0.2s ease;
     }
 
+    .btn-github .star-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #fff;
+    }
+
     .btn-github:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: #fff;
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 14px rgba(255, 215, 0, 0.2);
       color: #fff;
       transform: translateY(-1px);
     }
@@ -647,17 +669,362 @@
       font-size: 0.85rem;
     }
 
-    /* Responsive */
+    /* Quick Install One-Liner */
+    .quick-install {
+      max-width: 680px;
+      margin: 28px auto 0;
+      background: rgba(12, 17, 29, 0.9);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .quick-install-code {
+      display: flex;
+      align-items: center;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+      color: #fff;
+    }
+
+    .quick-install-code::-webkit-scrollbar { display: none; }
+
+    .prompt-sym {
+      color: var(--primary);
+      user-select: none;
+      margin-right: 8px;
+      font-weight: 700;
+    }
+
+    /* Dashboard Mockup Showcase */
+    .dashboard-preview {
+      background: rgba(9, 13, 22, 0.95);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 210, 255, 0.08);
+      margin-top: 40px;
+    }
+
+    .preview-header {
+      background: rgba(16, 24, 40, 0.9);
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .preview-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .preview-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .preview-title {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .preview-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--success);
+      font-family: var(--font-mono);
+      background: rgba(46, 204, 113, 0.12);
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(46, 204, 113, 0.25);
+    }
+
+    .preview-body {
+      padding: 24px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .preview-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .pm-card {
+      background: rgba(16, 23, 38, 0.85);
+      border: 1px solid rgba(0, 210, 255, 0.14);
+      border-radius: 10px;
+      padding: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .pm-card:hover {
+      border-color: var(--primary);
+    }
+
+    .pm-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .pm-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      font-family: var(--font-mono);
+    }
+
+    .pm-sub {
+      font-size: 0.75rem;
+      color: var(--success);
+      margin-top: 4px;
+    }
+
+    .preview-chart {
+      background: rgba(6, 9, 15, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-bottom: 12px;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: 120px;
+      display: block;
+    }
+
+    .preview-table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+    }
+
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      font-family: var(--font-mono);
+      text-align: left;
+    }
+
+    .preview-table th {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px 14px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      white-space: nowrap;
+    }
+
+    .preview-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .preview-table tr:last-child td { border-bottom: none; }
+
+    /* FAQ Section */
+    .faq-list {
+      max-width: 860px;
+      margin: 40px auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    .faq-item[open] {
+      border-color: var(--border-hover);
+      box-shadow: 0 4px 20px rgba(0, 210, 255, 0.08);
+    }
+
+    .faq-summary {
+      padding: 20px 24px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fff;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .faq-summary::-webkit-details-marker { display: none; }
+
+    .faq-icon {
+      font-size: 1.1rem;
+      color: var(--primary);
+      transition: transform 0.3s ease;
+      font-family: var(--font-mono);
+      font-weight: 400;
+    }
+
+    .faq-item[open] .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      padding: 0 24px 20px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      padding-top: 14px;
+    }
+
+    /* Back to top floating button */
+    #back-to-top {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(14, 21, 37, 0.88);
+      border: 1px solid var(--border-color);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    #back-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #back-to-top:hover {
+      border-color: var(--primary);
+      box-shadow: 0 0 16px var(--primary-glow);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 992px) {
+      .preview-metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
     @media (max-width: 768px) {
-      .hero h1 { font-size: 2.5rem; }
+      .nav-container { height: 64px; }
+      .brand { font-size: 1.15rem; gap: 10px; }
+      .brand img { height: 32px; }
       .nav-links { display: none; }
-      .table-container { overflow-x: auto; }
-      table { min-width: 600px; }
-      .grid-3 { grid-template-columns: 1fr; }
+      .nav-actions { gap: 10px; }
+      .btn-github { padding: 6px 12px; font-size: 0.8rem; }
+      
+      .hero { padding: 50px 0 35px; }
+      .hero h1 { font-size: 2.1rem; line-height: 1.2; letter-spacing: -0.8px; margin-bottom: 18px; }
+      .hero-p { font-size: 1rem; line-height: 1.6; margin-bottom: 26px; }
+      .hero-actions { flex-direction: column; width: 100%; gap: 12px; }
+      .btn-primary, .btn-secondary { width: 100%; justify-content: center; padding: 14px 20px; font-size: 0.95rem; }
+
+      .quick-install { flex-direction: column; align-items: stretch; gap: 10px; text-align: left; padding: 12px; }
+      .quick-install-code { font-size: 0.75rem; }
+      .quick-install .copy-btn { align-self: flex-end; }
+
+      .badges { gap: 6px; margin-bottom: 18px; }
+      .badge { font-size: 0.72rem; padding: 4px 10px; }
+
+      .terminal-box { margin-top: 30px; }
+      .terminal-body { font-size: 0.78rem; padding: 14px; overflow-x: auto; line-height: 1.6; }
+
+      .section-title { font-size: 1.85rem; letter-spacing: -0.6px; }
+      .section-desc { font-size: 0.95rem; }
+      section { padding: 55px 0; }
+
+      .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
+      table { min-width: 580px; }
+      th, td { padding: 12px 14px; font-size: 0.85rem; }
+
+      .grid-3 { grid-template-columns: 1fr; gap: 16px; }
+      .card { padding: 22px 18px; }
+
+      .mode-card { padding: 24px 18px; }
+      .code-block { flex-direction: column; align-items: stretch; gap: 10px; }
+      .code-block code { font-size: 0.75rem; overflow-x: auto; }
+      .code-block .copy-btn { align-self: flex-end; }
+
+      .faq-summary { font-size: 0.95rem; padding: 16px 18px; }
+      .faq-answer { font-size: 0.88rem; padding: 0 18px 16px; }
+
+      .arch-item { flex-direction: column; gap: 10px; padding: 16px; }
+      .arch-num { width: 30px; height: 30px; font-size: 0.85rem; }
+
+      .preview-body { padding: 16px; gap: 14px; }
+      .preview-metrics { grid-template-columns: 1fr; gap: 10px; }
+      .preview-table { min-width: 480px; }
+
+      footer { margin-top: 60px; padding: 40px 0 30px; }
+      .footer-links { flex-wrap: wrap; gap: 16px; }
+
+      #back-to-top { bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 0 16px; }
+      .hero h1 { font-size: 1.8rem; }
+      .brand span { display: none; }
+      .lang-btn { padding: 4px 8px; font-size: 0.75rem; }
     }
   </style>
 </head>
 <body class="lang-en">
+
+  <!-- Top Reading Scroll Progress Bar -->
+  <div id="scroll-progress"></div>
 
   <canvas id="bg-canvas"></canvas>
 
@@ -669,11 +1036,13 @@
         <div>Vortex <span>Profiler</span></div>
       </div>
       <ul class="nav-links">
-        <li><a href="#features"><span class="lang-en">Features</span><span class="lang-it">Funzionalità</span></a></li>
         <li><a href="#comparison"><span class="lang-en">Comparison</span><span class="lang-it">Confronto</span></a></li>
         <li><a href="#modes"><span class="lang-en">Modes</span><span class="lang-it">Modalità</span></a></li>
+        <li><a href="#telemetry"><span class="lang-en">Telemetry</span><span class="lang-it">Telemetria</span></a></li>
+        <li><a href="#features"><span class="lang-en">Diagnostics</span><span class="lang-it">Diagnostica</span></a></li>
         <li><a href="#quickstart"><span class="lang-en">Quickstart</span><span class="lang-it">Guida Rapida</span></a></li>
         <li><a href="#architecture"><span class="lang-en">Architecture</span><span class="lang-it">Architettura</span></a></li>
+        <li><a href="#faq">FAQ</a></li>
       </ul>
       <div class="nav-actions">
         <!-- Language Switcher -->
@@ -681,11 +1050,11 @@
           <span class="lang-btn active" id="btn-en">EN</span>
           <span class="lang-btn" id="btn-it">IT</span>
         </div>
-        <a href="https://github.com/Gabry022003/vortex-mem" target="_blank" class="btn-github">
-          <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor">
+        <a href="https://github.com/Gabry022003/vortex-mem" target="_blank" class="btn-github" title="Star vortex-mem on GitHub">
+          <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
             <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
           </svg>
-          GitHub
+          <span class="star-badge">⭐ Star</span>
         </a>
       </div>
     </div>
@@ -724,6 +1093,17 @@
           <span class="lang-en">Why Vortex?</span>
           <span class="lang-it">Perché Vortex?</span>
         </a>
+      </div>
+
+      <!-- Quick Install One-Liner -->
+      <div class="quick-install">
+        <div class="quick-install-code">
+          <span class="prompt-sym">$</span>
+          <code>git clone https://github.com/Gabry022003/vortex-mem.git && cd vortex-mem && make</code>
+        </div>
+        <button class="copy-btn" onclick="copyText(this, 'git clone https://github.com/Gabry022003/vortex-mem.git && cd vortex-mem && make')">
+          <span class="lang-en">Copy</span><span class="lang-it">Copia</span>
+        </button>
       </div>
 
       <!-- Terminal Showcase -->
@@ -875,6 +1255,131 @@
           <div class="code-block">
             <code>./vortex run --heavy ./bin/my_app</code>
             <button class="copy-btn" onclick="copyText(this, './vortex run --heavy ./bin/my_app')"><span class="lang-en">Copy</span><span class="lang-it">Copia</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Memory Allocation Trend (Timeline Profile) Showcase -->
+  <section id="telemetry" style="background: rgba(255, 255, 255, 0.012);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag"><span class="lang-en">Telemetry Profile</span><span class="lang-it">Profilo di Telemetria</span></span>
+        <h2 class="section-title">
+          <span class="lang-en">Memory Allocation Trend (Timeline Profile)</span>
+          <span class="lang-it">Andamento del Consumo di Memoria (Profilo Temporale)</span>
+        </h2>
+        <p class="section-desc">
+          <span class="lang-en">Illustrative curve of heap usage and peak allocation spikes tracked over execution time.</span>
+          <span class="lang-it">Curva d'esempio dell'uso della memoria heap e dei picchi di allocazione monitorati nel tempo di esecuzione.</span>
+        </p>
+      </div>
+
+      <div class="dashboard-preview">
+        <div class="preview-header">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="preview-dots">
+              <span style="background:#ff5f56;"></span>
+              <span style="background:#ffbd2e;"></span>
+              <span style="background:#27c93f;"></span>
+            </div>
+            <span class="preview-title">http://localhost:8000 — Vortex Observability Suite</span>
+          </div>
+          <div class="preview-status">
+            <span style="width:7px; height:7px; border-radius:50%; background:var(--primary); box-shadow:0 0 6px var(--primary-glow);"></span>
+            <span class="lang-en">TIMELINE TELEMETRY PROFILE</span>
+            <span class="lang-it">PROFILO TEMPORALE TELEMETRIA</span>
+          </div>
+        </div>
+
+        <div class="preview-body">
+          <!-- 4 Metric Cards -->
+          <div class="preview-metrics">
+            <div class="pm-card">
+              <div class="pm-label"><span class="lang-en">Live Heap Memory</span><span class="lang-it">Memoria Heap Live</span></div>
+              <div class="pm-val">14.82 MB</div>
+              <div class="pm-sub">+0.24 MB/s sampling</div>
+            </div>
+            <div class="pm-card">
+              <div class="pm-label"><span class="lang-en">Active Allocations</span><span class="lang-it">Allocazioni Attive</span></div>
+              <div class="pm-val">28,412</div>
+              <div class="pm-sub">0 Leaks Detected</div>
+            </div>
+            <div class="pm-card">
+              <div class="pm-label"><span class="lang-en">Peak Heap Footprint</span><span class="lang-it">Picco Massimo Heap</span></div>
+              <div class="pm-val">32.10 MB</div>
+              <div class="pm-sub">Recorded at T+0.84s</div>
+            </div>
+            <div class="pm-card">
+              <div class="pm-label"><span class="lang-en">Profiling Throughput</span><span class="lang-it">Throughput Profiler</span></div>
+              <div class="pm-val">2.05M <span style="font-size:0.85rem; color:var(--primary);">ops/s</span></div>
+              <div class="pm-sub">64 Cache Stripes</div>
+            </div>
+          </div>
+
+          <!-- SVG Real-Time Telemetry Curve -->
+          <div class="preview-chart">
+            <div class="chart-header">
+              <span>REAL-TIME HEAP ALLOCATION TIMELINE (60 SECONDS SAMPLING)</span>
+              <span style="color:var(--primary); font-weight:700;">14.82 MB</span>
+            </div>
+            <svg class="chart-svg" viewBox="0 0 800 120" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.35" />
+                  <stop offset="100%" stop-color="#00d2ff" stop-opacity="0.0" />
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="30" x2="800" y2="30" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4" />
+              <line x1="0" y1="65" x2="800" y2="65" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4" />
+              <line x1="0" y1="95" x2="800" y2="95" stroke="rgba(255,255,255,0.06)" stroke-dasharray="4" />
+              <path d="M0,90 Q80,85 140,70 T260,55 T380,68 T500,40 T620,48 T720,35 T800,32 L800,120 L0,120 Z" fill="url(#chartGrad)" />
+              <path d="M0,90 Q80,85 140,70 T260,55 T380,68 T500,40 T620,48 T720,35 T800,32" fill="none" stroke="#00d2ff" stroke-width="2.5" />
+              <circle cx="800" cy="32" r="4" fill="#00d2ff" />
+            </svg>
+          </div>
+
+          <!-- Active Call-Sites Table -->
+          <div class="preview-table-wrapper">
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th><span class="lang-en">Resolved Call-Site</span><span class="lang-it">Punto di Chiamata Risolto</span></th>
+                  <th><span class="lang-en">API Function</span><span class="lang-it">Funzione API</span></th>
+                  <th><span class="lang-en">Total Calls</span><span class="lang-it">Chiamate Totali</span></th>
+                  <th><span class="lang-en">Avg Size</span><span class="lang-it">Dimensione Media</span></th>
+                  <th><span class="lang-en">Avg Lifetime</span><span class="lang-it">Vita Media</span></th>
+                  <th><span class="lang-en">Status</span><span class="lang-it">Stato</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>src/network.c:142</code> (parse_packet)</td>
+                  <td><code>malloc</code></td>
+                  <td>42,100</td>
+                  <td>64 B</td>
+                  <td>0.12 ms</td>
+                  <td><span style="color:var(--success);">● Active</span></td>
+                </tr>
+                <tr>
+                  <td><code>src/protocol.c:78</code> (init_session)</td>
+                  <td><code>calloc</code></td>
+                  <td>1,840</td>
+                  <td>1,024 B</td>
+                  <td>12.40 ms</td>
+                  <td><span style="color:var(--success);">● Active</span></td>
+                </tr>
+                <tr>
+                  <td><code>src/buffer.c:210</code> (expand_queue)</td>
+                  <td><code>realloc</code></td>
+                  <td>320</td>
+                  <td>4,096 B</td>
+                  <td>Persistent</td>
+                  <td><span style="color:var(--primary);">● Retained</span></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1080,14 +1585,79 @@
     </div>
   </section>
 
+  <!-- Technical FAQ Section -->
+  <section id="faq">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag"><span class="lang-en">Frequently Asked Questions</span><span class="lang-it">Domande Frequenti</span></span>
+        <h2 class="section-title">
+          <span class="lang-en">Technical FAQ</span>
+          <span class="lang-it">FAQ Tecniche</span>
+        </h2>
+        <p class="section-desc">
+          <span class="lang-en">Common engineering questions regarding runtime semantics, security, and low-level mechanics.</span>
+          <span class="lang-it">Risposte immediate ai dubbi tecnici più comuni su sicurezza, semantica di runtime e meccaniche interne.</span>
+        </p>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary class="faq-summary">
+            <span><span class="lang-en">Does Vortex require root or <code>sudo</code> privileges?</span><span class="lang-it">Vortex richiede privilegi di root o <code>sudo</code>?</span></span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">
+            <span class="lang-en">No. Vortex operates entirely within standard user-space via the POSIX dynamic linker (<code>LD_PRELOAD</code>). It requires zero elevated privileges and leaves your system configuration untouched.</span>
+            <span class="lang-it">No. Vortex opera interamente nello spazio utente tramite il dynamic linker POSIX (<code>LD_PRELOAD</code>). Non richiede privilegi speciali di sistema e non modifica la configurazione dell'OS.</span>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">
+            <span><span class="lang-en">Does it support closed-source binaries and 3rd-party shared libraries?</span><span class="lang-it">Supporta binari closed-source e librerie di terze parti precompilate?</span></span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">
+            <span class="lang-en">Yes. Because Vortex hooks dynamic allocation symbols at the libc boundary, any executable or dynamically linked third-party <code>.so</code> library is monitored seamlessly without needing the original source code.</span>
+            <span class="lang-it">Sì. Poiché Vortex intercetta le funzioni di allocazione sui confini della libc, qualsiasi eseguibile o libreria condivisa <code>.so</code> di terze parti viene tracciata nativamente senza bisogno del codice sorgente originale.</span>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">
+            <span><span class="lang-en">How does Vortex prevent lock contention in heavily multi-threaded programs?</span><span class="lang-it">Come evita la contesa dei lock nei programmi multi-thread intensivi?</span></span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">
+            <span class="lang-en">Vortex splits its internal pointer tracking into 64 distinct hash stripes, each protected by an independent, CPU cache-line aligned spinlock. Threads allocating concurrently hash to different stripes with virtually zero contention.</span>
+            <span class="lang-it">Vortex suddivide il tracciamento dei puntatori in 64 stripe hash indipendenti, ciascuna protetta da uno spinlock allineato alla cache CPU. I thread che allocano simultaneamente finiscono su stripe diverse con contesa praticamente nulla.</span>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-summary">
+            <span><span class="lang-en">Can Vortex be integrated into CI/CD automated test pipelines?</span><span class="lang-it">Come si integra Vortex nelle pipeline CI/CD di testing automatico?</span></span>
+            <span class="faq-icon">+</span>
+          </summary>
+          <div class="faq-answer">
+            <span class="lang-en">Yes. Using <code>./vortex run --ci ./bin/app</code>, the web server is suppressed. Vortex runs the binary headlessly, emits a machine-readable <code>vortex_report.json</code>, and exits with code 1 if any leaks or corruptions are found.</span>
+            <span class="lang-it">Sì. Usando <code>./vortex run --ci ./bin/app</code>, il server web non viene avviato. Vortex esegue il test in modalità headless, genera il report JSON strutturato <code>vortex_report.json</code> e termina con codice di errore 1 se rileva anomalie.</span>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
   <!-- Footer -->
   <footer>
     <div class="container">
       <ul class="footer-links">
         <li><a href="https://github.com/Gabry022003/vortex-mem" target="_blank">GitHub Repository</a></li>
         <li><a href="https://github.com/Gabry022003/vortex-mem/blob/main/LICENSE" target="_blank">MIT License</a></li>
+        <li><a href="#telemetry"><span class="lang-en">Telemetry</span><span class="lang-it">Telemetria</span></a></li>
         <li><a href="#quickstart"><span class="lang-en">Quickstart</span><span class="lang-it">Guida Rapida</span></a></li>
         <li><a href="#architecture"><span class="lang-en">Architecture</span><span class="lang-it">Architettura</span></a></li>
+        <li><a href="#faq">FAQ</a></li>
       </ul>
       <p class="footer-copy">
         <span class="lang-en">Vortex Memory Profiler — Released under the MIT License. Free for personal, academic, and commercial use.</span>
@@ -1175,6 +1745,24 @@
     }
     animateBg();
 
+    // Reading Progress & Back to Top button listener
+    const bttBtn = document.getElementById('back-to-top');
+    const scrollProgress = document.getElementById('scroll-progress');
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      if (scrollProgress) {
+        scrollProgress.style.width = scrolled + '%';
+      }
+
+      if (winScroll > 300) {
+        bttBtn.classList.add('visible');
+      } else {
+        bttBtn.classList.remove('visible');
+      }
+    }, { passive: true });
+
     document.addEventListener('DOMContentLoaded', () => {
       const savedLang = localStorage.getItem('vortex_lang');
       if (savedLang) {
@@ -1189,5 +1777,8 @@
       }
     });
   </script>
+
+  <!-- Floating Back to Top Button -->
+  <button id="back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="Back to top / Torna su" aria-label="Back to top">↑</button>
 </body>
 </html>
