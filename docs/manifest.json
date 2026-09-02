@@ -1,0 +1,21 @@
+﻿{
+  "name": "Vortex Memory Profiler",
+  "short_name": "Vortex",
+  "description": "Real-Time C/C++ Memory Profiler and Corruption Detection",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080b11",
+  "theme_color": "#080b11",
+  "icons": [
+    {
+      "src": "assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
