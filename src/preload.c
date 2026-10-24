@@ -242,6 +242,7 @@ static void vx_atfork_child(void)
 __attribute__((constructor)) static void vortex_init(void)
 {
     init_real_functions();
+    vx_in_hook = true;
     load_config();
     vx_sig_init();
     vx_tracker_init(1024 * 1024);
@@ -250,9 +251,7 @@ __attribute__((constructor)) static void vortex_init(void)
     void *dummy[1];
     backtrace(dummy, 1);
 
-    vx_in_hook = true;
     vx_telemetry_init();
-    vx_in_hook = false;
 
     pthread_atfork(vx_atfork_prepare, vx_atfork_parent, vx_atfork_child);
 
@@ -267,6 +266,8 @@ __attribute__((constructor)) static void vortex_init(void)
     sigaction(SIGSEGV, &sa, NULL);
     sigaction(SIGBUS, &sa, NULL);
     sigaction(SIGABRT, &sa, NULL);
+
+    vx_in_hook = false;
 
     if (vx_config.verbose)
     {
