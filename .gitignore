@@ -23,3 +23,8 @@ frontend/dist/
 .DS_Store
 .vscode/
 .idea/
+
+# Release archives
+release/
+*.tar.gz
+*.zip
