@@ -284,6 +284,17 @@ static void serve_file(int client_fd, const char *raw_req_path)
         char *q = strchr(clean_path, '?');
         if (q)
             *q = '\0';
+
+        if (strcmp(clean_path, "vortex_report.json") != 0 &&
+            strncmp(clean_path, "vortex_report_", 14) != 0 &&
+            strncmp(clean_path, "test_report", 11) != 0)
+        {
+            const char *forbidden = "HTTP/1.1 403 Forbidden\r\nContent-Length: 9\r\n\r\nForbidden";
+            send(client_fd, forbidden, strlen(forbidden), 0);
+            close(client_fd);
+            return;
+        }
+
         snprintf(filepath, sizeof(filepath), "./%s", clean_path);
     }
     else

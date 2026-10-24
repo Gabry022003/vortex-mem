@@ -61,7 +61,10 @@ Vortex operates in two primary modes depending on the developer's needs:
 
 ## Getting Started
 
-Vortex currently supports Linux environments and Windows via WSL (Windows Subsystem for Linux) using `LD_PRELOAD`.
+### System Requirements
+- **OS**: Linux x86_64 (glibc ≥ 2.27) or Windows 10/11 via WSL2 (Ubuntu / Debian recommended).
+- **Compilers & Tools**: `gcc` / `g++` (C11, C++17), `make`, `binutils` (`addr2line`).
+- **Web UI (Optional)**: Node.js 18+ and `npm` (required only to build the React dashboard from source; headless/CI mode runs with zero external dependencies).
 
 ### Building the Project
 
@@ -78,6 +81,20 @@ cd frontend
 npm install
 npm run build
 cd ..
+```
+
+### Installation (Optional)
+
+You can install Vortex system-wide to `/usr/local/bin` and `/usr/local/lib`:
+
+```bash
+sudo make install
+```
+
+To remove it later:
+
+```bash
+sudo make uninstall
 ```
 
 ### Running an Application

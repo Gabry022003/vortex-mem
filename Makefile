@@ -8,6 +8,10 @@ SRC_DIR = src
 BIN_DIR = bin
 TEST_DIR = tests
 
+PREFIX ?= /usr/local
+BINDIR ?= $(PREFIX)/bin
+LIBDIR ?= $(PREFIX)/lib
+
 SRCS_C = $(SRC_DIR)/preload.c $(SRC_DIR)/bootstrap.c $(SRC_DIR)/tracker.c $(SRC_DIR)/stacktrace.c $(SRC_DIR)/report.c $(SRC_DIR)/analyzer.c
 SRCS_CXX = $(SRC_DIR)/preload_cpp.cpp
 OBJS = $(SRCS_C:.c=.o) $(SRCS_CXX:.cpp=.o)
@@ -34,7 +38,10 @@ TEST_CPP_BIN = $(BIN_DIR)/test_cpp
 ROBUSTNESS_SRC = $(TEST_DIR)/test_robustness.c
 ROBUSTNESS_BIN = $(BIN_DIR)/test_robustness
 
-all: $(LIB) $(TEST_BIN) $(GOD_MODE_BIN) $(SERVER_BIN) $(MULTITHREAD_BIN) $(BENCHMARK_BIN) $(TEST_CPP_BIN) $(ROBUSTNESS_BIN)
+GENERAL_TEST_SRC = $(TEST_DIR)/test_vortex.c
+GENERAL_TEST_BIN = $(BIN_DIR)/test_vortex
+
+all: $(LIB) $(TEST_BIN) $(GOD_MODE_BIN) $(SERVER_BIN) $(MULTITHREAD_BIN) $(BENCHMARK_BIN) $(TEST_CPP_BIN) $(ROBUSTNESS_BIN) $(GENERAL_TEST_BIN)
 
 $(LIB): $(OBJS)
 	@mkdir -p $(BIN_DIR)
@@ -68,6 +75,10 @@ $(ROBUSTNESS_BIN): $(ROBUSTNESS_SRC)
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) -rdynamic $< -o $@
 
+$(GENERAL_TEST_BIN): $(GENERAL_TEST_SRC)
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) -rdynamic $< -o $@ -lpthread
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -82,7 +93,19 @@ test: all
 	$(CC) $(CFLAGS) $(RUNNER_SRC) -o $(RUNNER_BIN)
 	./$(RUNNER_BIN)
 
-clean:
-	rm -f $(OBJS) $(LIB) $(TEST_BIN) $(GOD_MODE_BIN) $(SERVER_BIN) $(MULTITHREAD_BIN) $(BENCHMARK_BIN) $(TEST_CPP_BIN) $(ROBUSTNESS_BIN) $(RUNNER_BIN) vortex_report*.json test_report*.json
+install: $(LIB) $(SERVER_BIN)
+	install -d $(DESTDIR)$(BINDIR)
+	install -d $(DESTDIR)$(LIBDIR)
+	install -m 755 $(LIB) $(DESTDIR)$(LIBDIR)/libvortex.so
+	install -m 755 $(SERVER_BIN) $(DESTDIR)$(BINDIR)/vortex_server
+	install -m 755 vortex $(DESTDIR)$(BINDIR)/vortex
 
-.PHONY: all test clean
+uninstall:
+	rm -f $(DESTDIR)$(LIBDIR)/libvortex.so
+	rm -f $(DESTDIR)$(BINDIR)/vortex_server
+	rm -f $(DESTDIR)$(BINDIR)/vortex
+
+clean:
+	rm -f $(OBJS) $(LIB) $(TEST_BIN) $(GOD_MODE_BIN) $(SERVER_BIN) $(MULTITHREAD_BIN) $(BENCHMARK_BIN) $(TEST_CPP_BIN) $(ROBUSTNESS_BIN) $(GENERAL_TEST_BIN) $(RUNNER_BIN) vortex_report*.json test_report*.json
+
+.PHONY: all test clean install uninstall

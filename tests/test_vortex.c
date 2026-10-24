@@ -65,6 +65,6 @@ int main()
 
     simulate_double_free();
 
-    printf("--- Fine del Test ---\n");
+    printf("--- End of Test ---\n");
     return 0;
 }

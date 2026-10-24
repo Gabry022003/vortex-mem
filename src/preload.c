@@ -14,6 +14,7 @@
 #include <sys/mman.h>
 #include <stdarg.h>
 #include <wchar.h>
+#include <execinfo.h>
 
 void *(*real_malloc)(size_t) = NULL;
 void (*real_free)(void *) = NULL;
@@ -80,6 +81,8 @@ static void sig_handler(int sig)
         const char crash_msg[] = "\n[Vortex] Fatal signal caught or signal interrupted profiler internals. Skipping report generation to avoid deadlocks.\n";
         ssize_t wr = write(STDERR_FILENO, crash_msg, sizeof(crash_msg) - 1);
         (void)wr;
+        signal(sig, SIG_DFL);
+        raise(sig);
         _exit(128 + sig);
     }
 
@@ -96,11 +99,7 @@ static void sig_handler(int sig)
 
     if (pipe_written)
     {
-        for (int i = 0; i < 20; i++)
-        {
-            struct timespec req = {0, 100000000L};
-            nanosleep(&req, NULL);
-        }
+        sleep(2);
     }
     else
     {
@@ -247,6 +246,9 @@ __attribute__((constructor)) static void vortex_init(void)
     vx_sig_init();
     vx_tracker_init(1024 * 1024);
     vx_stacktrace_init();
+
+    void *dummy[1];
+    backtrace(dummy, 1);
 
     vx_in_hook = true;
     vx_telemetry_init();
@@ -415,12 +417,7 @@ VX_EXPORT void free(void *ptr)
                 uint32_t stack_id = vx_stacktrace_register();
                 vx_tracker_record_error(VX_ERR_INVALID_FREE, ptr, 0, stack_id);
             }
-            void *free_target = ptr;
-            if (vx_config.use_red_zones && vx_check_redzone((char *)ptr - VX_RED_ZONE_SIZE, VX_RED_ZONE_SIZE))
-            {
-                free_target = (char *)ptr - VX_RED_ZONE_SIZE;
-            }
-            real_free(free_target);
+            real_free(ptr);
         }
 
         if (!was_in_hook)

@@ -4,8 +4,43 @@ set -e
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 LIB="$DIR/bin/libvortex.so"
 
+VERSION="1.0.0"
+
+show_help() {
+    echo "Vortex Memory Profiler v$VERSION"
+    echo "Usage: $0 run [options] <program> [args...]"
+    echo ""
+    echo "Commands:"
+    echo "  run                   Profile and run the target application"
+    echo ""
+    echo "Options:"
+    echo "  --ci, --headless      Run without launching telemetry server or web dashboard"
+    echo "  --heavy               Enable Redzones (overflow/underflow) and Poisoned Quarantine (UAF)"
+    echo "  -p, --port <port>     Set HTTP dashboard port (default: 8000)"
+    echo "  --udp-port <port>     Set internal UDP telemetry port (default: 8001)"
+    echo "  -h, --help            Show this help message"
+    echo "  -v, --version         Show version information"
+    echo ""
+    echo "Environment Variables:"
+    echo "  VORTEX_OUTPUT         Path for JSON report output (default: ./vortex_report.json)"
+    echo "  VORTEX_STACK_DEPTH    Max stack frames to capture (default: 16, max: 32)"
+    echo "  VORTEX_RED_ZONES      1 to enable canary redzones"
+    echo "  VORTEX_QUARANTINE     1 to enable deferred quarantine with memory poisoning"
+}
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
+    show_help
+    exit 0
+fi
+
+if [ "$1" = "-v" ] || [ "$1" = "--version" ] || [ "$1" = "version" ]; then
+    echo "Vortex Memory Profiler v$VERSION"
+    exit 0
+fi
+
 if [ "$1" != "run" ]; then
     echo "Usage: $0 run [--ci|--headless|--no-ui] [--heavy] [--port <port>] <program> [args...]"
+    echo "Run '$0 --help' for full options."
     exit 1
 fi
 
